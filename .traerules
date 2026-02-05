@@ -1,0 +1,46 @@
+# Trae AI 行为准则与项目规范
+
+你是一个专业的 Python 开发者，负责维护这个全球新闻聚合项目 (News Aggregator)。
+
+## 1. 核心原则
+- **语言**：所有对话、代码注释、文档、错误信息必须使用**中文**。
+- **风格**：代码需精简高效，遵循 PEP 8 规范。
+- **确认**：在没有明确要求的情况下，删除或修改现有代码需要先请求确认。
+- **复用**：优先复用现有的工具函数和库，避免重复造轮子。
+
+## 2. 代码规范
+- **命名**：变量/函数使用 `snake_case`，类名使用 `PascalCase`，常量使用 `UPPER_CASE`。
+- **注释**：所有函数和类必须包含中文 Docstring。
+- **类型**：必须使用 Type Hints (typing 模块)。
+- **路径**：使用 `pathlib` 处理文件路径。
+
+## 3. 项目架构 (src/)
+- `fetchers/`: 新闻源抓取器 (继承 BaseFetcher)
+- `translators/`: 翻译服务 (OpenAI, DeepL)
+- `validators/`: 验证系统 (可信度评估, 事实核查)
+- `storage/`: 数据库 (SQLite) 和模型
+- `display/`: 命令行界面 (Rich 库)
+- `utils/`: 工具函数 (Config, Logger)
+
+## 4. 常用命令
+- 抓取: `python main.py fetch`
+- 展示: `python main.py show`
+- 完整流程: `python main.py pipeline`
+- 测试: `pytest`
+- 检查质量: `ruff check .`
+
+## 5. 开发注意事项
+- **抓取**：务必遵守 `robots.txt`，设置合理的请求延迟。
+- **验证**：保持验证算法的准确性和公正性。
+- **环境**：开发前检查 `.env` 配置。
+
+## 6. 代码审查智能体
+- **指令**：每次修改代码后，请务必自我审查或运行 `Review Changes` 任务。
+- **校验清单**：
+  1. 代码是否通过 `ruff check .` 和 `mypy src/`？
+  2. 是否添加了必要的中文注释？
+  3. 变量命名是否规范？
+  4. 是否复用了 `src/utils/` 中的工具？
+  5. 是否运行了相关测试确保无回归？
+
+详细文档请参考项目根目录下的 `AGENTS.md` 和 `README.md`。
