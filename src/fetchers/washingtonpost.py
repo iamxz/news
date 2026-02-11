@@ -1,11 +1,11 @@
 """
-法新社（AFP）新闻抓取器
+华盛顿邮报新闻抓取器
 
-抓取 AFP 的 RSS 订阅
+The Washington Post - 美国主流媒体，以政治报道著称
 """
+import feedparser
 from datetime import datetime
 from typing import List, Optional
-import feedparser
 from bs4 import BeautifulSoup
 
 from src.fetchers.base import BaseFetcher
@@ -13,15 +13,15 @@ from src.storage.models import NewsArticle
 from src.utils.logger import logger
 
 
-class AFPFetcher(BaseFetcher):
-    """法新社新闻抓取器"""
+class WashingtonPostFetcher(BaseFetcher):
+    """华盛顿邮报抓取器"""
     
     def __init__(self):
-        super().__init__('AFP', 'https://example.com', 1.0)
-        self.rss_url = 'https://www.afp.com/en/rss'
+        super().__init__('Washington Post', 'https://example.com', 1.0)
+        self.rss_url = 'https://feeds.washingtonpost.com/rss/world'
     
     async def fetch(self) -> List[NewsArticle]:
-        """抓取 AFP 新闻"""
+        """抓取新闻"""
         try:
             logger.info(f"开始抓取 {self.source_name}")
             
@@ -52,11 +52,13 @@ class AFPFetcher(BaseFetcher):
         if not title or not url:
             return None
         
+        # 提取内容
         content = ''
         if hasattr(entry, 'summary'):
             soup = BeautifulSoup(entry.summary, 'html.parser')
             content = soup.get_text().strip()
         
+        # 解析时间
         published_at = self._parse_date(entry.get('published', ''))
         
         return NewsArticle(
@@ -66,10 +68,10 @@ class AFPFetcher(BaseFetcher):
             source=self.source_name,
             url=url,
             published_at=published_at,
-            category='综合',
-            priority=9
+            category='政治',
+            priority=8
         )
-    
+
     def parse(self, raw_data):
         """解析原始数据（兼容基类接口）"""
         return []

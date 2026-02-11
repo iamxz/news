@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统设置 - 管理后台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <a href="/admin" class="text-xl font-bold text-gray-900">📊 管理后台</a>
+                    <a href="/admin" class="text-gray-700 hover:text-blue-600">仪表板</a>
+                    <a href="/admin/fetch" class="text-gray-700 hover:text-blue-600">抓取管理</a>
+                    <a href="/admin/translate" class="text-gray-700 hover:text-blue-600">翻译管理</a>
+                    <a href="/admin/validate" class="text-gray-700 hover:text-blue-600">验证管理</a>
+                    <a href="/admin/scheduler" class="text-gray-700 hover:text-blue-600">定时任务</a>
+                    <a href="/admin/settings" class="text-blue-600 font-semibold">系统设置</a>
+                </div>
+                <a href="/" class="text-blue-600 hover:text-blue-800">← 返回前台</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">系统设置</h1>
+
+        <!-- 数据清理 -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">数据清理</h2>
+            <div class="flex gap-4 items-center mb-4">
+                <span class="text-gray-700">清理</span>
+                <select id="cleanDays" class="px-4 py-2 border border-gray-300 rounded">
+                    <option value="7">7天</option>
+                    <option value="30" selected>30天</option>
+                    <option value="60">60天</option>
+                    <option value="90">90天</option>
+                </select>
+                <span class="text-gray-700">前的旧新闻</span>
+                <button onclick="cleanOldNews()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                    执行清理
+                </button>
+            </div>
+            <div id="cleanStatus" class="text-sm text-gray-600"></div>
+        </div>
+
+        <!-- 系统信息 -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">系统信息</h2>
+            <div class="space-y-3">
+                <div class="flex justify-between py-2 border-b">
+                    <span class="text-gray-600">数据库路径</span>
+                    <span class="text-gray-900">{{ settings.database_path }}</span>
+                </div>
+                <div class="flex justify-between py-2 border-b">
+                    <span class="text-gray-600">日志级别</span>
+                    <span class="text-gray-900">{{ settings.log_level }}</span>
+                </div>
+                <div class="flex justify-between py-2 border-b">
+                    <span class="text-gray-600">代理设置</span>
+                    <span class="text-gray-900">{{ settings.http_proxy or '未设置' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function cleanOldNews() {
+            const days = document.getElementById('cleanDays').value;
+            const status = document.getElementById('cleanStatus');
+            
+            if (!confirm(`确定要清理 ${days} 天前的旧新闻吗？此操作不可恢复！`)) {
+                return;
+            }
+            
+            status.textContent = '正在清理...';
+            status.className = 'text-sm text-blue-600';
+
+            try {
+                const response = await fetch('/api/admin/clean', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ days: parseInt(days) })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    status.textContent = data.message;
+                    status.className = 'text-sm text-green-600';
+                } else {
+                    status.textContent = '清理失败: ' + data.error;
+                    status.className = 'text-sm text-red-600';
+                }
+            } catch (error) {
+                status.textContent = '清理失败: ' + error.message;
+                status.className = 'text-sm text-red-600';
+            }
+        }
+    </script>
+</body>
+</html>

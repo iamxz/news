@@ -1,0 +1,85 @@
+"""
+今日头条热搜抓取器
+"""
+import hashlib
+from typing import List, Optional
+from datetime import datetime
+import feedparser
+from dateutil import parser as date_parser
+from src.fetchers.base import BaseFetcher
+from src.storage.models import NewsArticle
+from src.utils.logger import logger
+
+
+class ToutiaoFetcher(BaseFetcher):
+    """今日头条热搜抓取器"""
+    
+    def __init__(self):
+        super().__init__('今日头条', 'https://www.toutiao.com', 2.0)
+        # 使用 RSSHub 提供的头条热榜
+        self.rss_url = 'https://rsshub.app/toutiao/index'
+    
+    async def fetch(self) -> List[NewsArticle]:
+        """抓取头条热搜"""
+        try:
+            feed = feedparser.parse(self.rss_url)
+            articles = []
+            
+            for entry in feed.entries[:20]:
+                article = self._parse_entry(entry)
+                if article:
+                    articles.append(article)
+            
+            logger.info(f"今日头条: 抓取到 {len(articles)} 条热搜")
+            return articles
+            
+        except Exception as e:
+            logger.error(f"今日头条抓取失败: {e}")
+            return []
+    
+    def _parse_entry(self, entry) -> Optional[NewsArticle]:
+        """解析单条热搜"""
+        try:
+            title = entry.get('title', '').strip()
+            link = entry.get('link', '')
+            
+            if not title or not link:
+                return None
+            
+            # 生成唯一 ID
+            article_id = self.generate_id(link)
+            
+            # 解析发布时间
+            published_at = self._parse_date(entry.get('published', ''))
+            
+            # 内容
+            content = entry.get('description', title)
+            
+            return NewsArticle(
+                id=article_id,
+                title=title,
+                content=content,
+                source=self.source_name,
+                url=link,
+                published_at=published_at,
+                category='热搜',
+                priority=8,
+                tags=['热搜', '头条'],
+                credibility_score=0.75
+            )
+            
+        except Exception as e:
+            logger.error(f"解析头条热搜失败: {e}")
+            return None
+    
+    def parse(self, raw_data):
+        return []
+    
+    def _parse_date(self, date_str):
+        try:
+            return date_parser.parse(date_str)
+        except:
+            return datetime.now()
+    
+    def generate_id(self, url):
+        return hashlib.md5(url.encode()).hexdigest()

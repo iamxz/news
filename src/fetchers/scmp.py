@@ -1,11 +1,10 @@
 """
-法新社（AFP）新闻抓取器
+南华早报抓取器
 
-抓取 AFP 的 RSS 订阅
+香港英文媒体，亚洲视角
 """
-from datetime import datetime
-from typing import List, Optional
 import feedparser
+from typing import List, Optional
 from bs4 import BeautifulSoup
 
 from src.fetchers.base import BaseFetcher
@@ -13,15 +12,15 @@ from src.storage.models import NewsArticle
 from src.utils.logger import logger
 
 
-class AFPFetcher(BaseFetcher):
-    """法新社新闻抓取器"""
+class SCMPFetcher(BaseFetcher):
+    """南华早报抓取器"""
     
     def __init__(self):
-        super().__init__('AFP', 'https://example.com', 1.0)
-        self.rss_url = 'https://www.afp.com/en/rss'
+        super().__init__('SCMP', 'https://example.com', 1.0)
+        self.rss_url = 'https://www.scmp.com/rss/91/feed'
     
     async def fetch(self) -> List[NewsArticle]:
-        """抓取 AFP 新闻"""
+        """抓取新闻"""
         try:
             logger.info(f"开始抓取 {self.source_name}")
             
@@ -67,9 +66,13 @@ class AFPFetcher(BaseFetcher):
             url=url,
             published_at=published_at,
             category='综合',
-            priority=9
+            priority=7
         )
     
+    def parse(self, raw_data):
+        """解析原始数据（兼容基类接口）"""
+        return []
+
     def parse(self, raw_data):
         """解析原始数据（兼容基类接口）"""
         return []

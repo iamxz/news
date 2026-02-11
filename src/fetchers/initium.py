@@ -1,11 +1,10 @@
 """
-法新社（AFP）新闻抓取器
+端传媒抓取器
 
-抓取 AFP 的 RSS 订阅
+深度华文媒体，独立调查报道
 """
-from datetime import datetime
-from typing import List, Optional
 import feedparser
+from typing import List, Optional
 from bs4 import BeautifulSoup
 
 from src.fetchers.base import BaseFetcher
@@ -13,15 +12,15 @@ from src.storage.models import NewsArticle
 from src.utils.logger import logger
 
 
-class AFPFetcher(BaseFetcher):
-    """法新社新闻抓取器"""
+class InitiumFetcher(BaseFetcher):
+    """端传媒抓取器"""
     
     def __init__(self):
-        super().__init__('AFP', 'https://example.com', 1.0)
-        self.rss_url = 'https://www.afp.com/en/rss'
+        super().__init__('端传媒', 'https://example.com', 1.0)
+        self.rss_url = 'https://theinitium.com/newsfeed/'
     
     async def fetch(self) -> List[NewsArticle]:
-        """抓取 AFP 新闻"""
+        """抓取新闻"""
         try:
             logger.info(f"开始抓取 {self.source_name}")
             
@@ -67,9 +66,13 @@ class AFPFetcher(BaseFetcher):
             url=url,
             published_at=published_at,
             category='综合',
-            priority=9
+            priority=6
         )
     
+    def parse(self, raw_data):
+        """解析原始数据（兼容基类接口）"""
+        return []
+
     def parse(self, raw_data):
         """解析原始数据（兼容基类接口）"""
         return []

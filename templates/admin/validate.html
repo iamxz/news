@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>验证管理 - 管理后台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <a href="/admin" class="text-xl font-bold text-gray-900">📊 管理后台</a>
+                    <a href="/admin" class="text-gray-700 hover:text-blue-600">仪表板</a>
+                    <a href="/admin/fetch" class="text-gray-700 hover:text-blue-600">抓取管理</a>
+                    <a href="/admin/translate" class="text-gray-700 hover:text-blue-600">翻译管理</a>
+                    <a href="/admin/validate" class="text-blue-600 font-semibold">验证管理</a>
+                    <a href="/admin/scheduler" class="text-gray-700 hover:text-blue-600">定时任务</a>
+                    <a href="/admin/settings" class="text-gray-700 hover:text-blue-600">系统设置</a>
+                </div>
+                <a href="/" class="text-blue-600 hover:text-blue-800">← 返回前台</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">验证管理</h1>
+
+        <!-- 操作按钮 -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <div class="flex gap-4 mb-4">
+                <button onclick="validateAll()" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                    验证所有未验证新闻
+                </button>
+                <select id="limit" class="px-4 py-2 border border-gray-300 rounded">
+                    <option value="10">10条</option>
+                    <option value="50" selected>50条</option>
+                    <option value="100">100条</option>
+                </select>
+            </div>
+            <div id="status" class="text-sm text-gray-600"></div>
+        </div>
+
+        <!-- 未验证新闻列表 -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">未验证新闻（共 {{ articles|length }} 条）</h2>
+            <div class="space-y-4">
+                {% for article in articles %}
+                <div class="border border-gray-200 rounded p-4">
+                    <div class="font-semibold text-gray-900 mb-2">{{ article.title }}</div>
+                    <div class="flex items-center gap-4 text-sm text-gray-600">
+                        <span>{{ article.source }}</span>
+                        <span>{{ article.published_at|format_datetime }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function validateAll() {
+            const limit = document.getElementById('limit').value;
+            const status = document.getElementById('status');
+            
+            status.textContent = '正在验证...';
+            status.className = 'text-sm text-blue-600';
+
+            try {
+                const response = await fetch('/api/admin/validate-all', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ limit: parseInt(limit) })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    status.textContent = data.message;
+                    status.className = 'text-sm text-green-600';
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    status.textContent = '验证失败: ' + data.error;
+                    status.className = 'text-sm text-red-600';
+                }
+            } catch (error) {
+                status.textContent = '验证失败: ' + error.message;
+                status.className = 'text-sm text-red-600';
+            }
+        }
+    </script>
+</body>
+</html>

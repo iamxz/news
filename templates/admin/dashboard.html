@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台 - 全球新闻聚合</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <a href="/admin" class="text-xl font-bold text-gray-900">📊 管理后台</a>
+                    <a href="/admin" class="text-gray-700 hover:text-blue-600">仪表板</a>
+                    <a href="/admin/fetch" class="text-gray-700 hover:text-blue-600">抓取管理</a>
+                    <a href="/admin/translate" class="text-gray-700 hover:text-blue-600">翻译管理</a>
+                    <a href="/admin/validate" class="text-gray-700 hover:text-blue-600">验证管理</a>
+                    <a href="/admin/scheduler" class="text-gray-700 hover:text-blue-600">定时任务</a>
+                    <a href="/admin/settings" class="text-gray-700 hover:text-blue-600">系统设置</a>
+                </div>
+                <a href="/" class="text-blue-600 hover:text-blue-800">← 返回前台</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">仪表板</h1>
+
+        <!-- 统计卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="text-gray-500 text-sm mb-2">总新闻数</div>
+                <div class="text-3xl font-bold text-gray-900">{{ stats.total }}</div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="text-gray-500 text-sm mb-2">已翻译</div>
+                <div class="text-3xl font-bold text-green-600">{{ stats.translated }}</div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="text-gray-500 text-sm mb-2">已验证</div>
+                <div class="text-3xl font-bold text-blue-600">{{ stats.validated }}</div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="text-gray-500 text-sm mb-2">新闻源数</div>
+                <div class="text-3xl font-bold text-purple-600">{{ stats.by_source|length }}</div>
+            </div>
+        </div>
+
+        <!-- 按来源统计 -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">各新闻源统计</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {% for source, count in stats.by_source.items() %}
+                <div class="border border-gray-200 rounded p-3">
+                    <div class="text-sm text-gray-600">{{ source }}</div>
+                    <div class="text-2xl font-bold text-gray-900">{{ count }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

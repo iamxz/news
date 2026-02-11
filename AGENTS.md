@@ -180,6 +180,23 @@
     - 深度分析日本社会和政治
     - RSS: https://www.japantimes.co.jp/feed/
 
+### 中国热搜
+
+27. **今日头条热搜** - https://www.toutiao.com
+    - 字节跳动旗下新闻聚合平台
+    - 实时热点新闻和话题
+    - 使用 RSSHub: https://rsshub.app/toutiao/index
+
+28. **百度热搜** - https://www.baidu.com
+    - 百度搜索热榜
+    - 反映中国网民关注热点
+    - 使用 RSSHub: https://rsshub.app/baidu/trending
+
+29. **微博热搜** - https://weibo.com
+    - 中国最大社交媒体平台
+    - 实时热门话题和事件
+    - 使用 RSSHub: https://rsshub.app/weibo/search/hot
+
 ### 抓取优先级策略
 
 **高优先级（每小时）：**
@@ -189,6 +206,9 @@
 - BBC News
 - Hacker News
 - Bloomberg
+- 今日头条热搜
+- 百度热搜
+- 微博热搜
 
 **中优先级（每 6 小时）：**
 

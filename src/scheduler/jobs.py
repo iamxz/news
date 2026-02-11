@@ -7,7 +7,12 @@ from datetime import datetime
 from src.fetchers import (
     ReutersFetcher, APNewsFetcher, BBCFetcher, BloombergFetcher,
     HackerNewsFetcher, GuardianFetcher, NYTimesFetcher, AlJazeeraFetcher,
-    TechCrunchFetcher, ZaobaoFetcher, AFPFetcher
+    TechCrunchFetcher, ZaobaoFetcher, AFPFetcher, WashingtonPostFetcher,
+    FinancialTimesFetcher, EconomistFetcher, ArsTechnicaFetcher,
+    TheVergeFetcher, GoogleNewsFetcher, EightWorldFetcher, NHKWorldFetcher,
+    AsahiFetcher, MainichiFetcher, JapanTimesFetcher, ShinMinFetcher,
+    SCMPFetcher, InitiumFetcher, ToutiaoFetcher, BaiduFetcher, WeiboFetcher,
+    RuanyifengFetcher, MITTechReviewFetcher
 )
 from src.translators import translator_manager
 from src.validators import ValidationPipeline
@@ -31,6 +36,9 @@ class NewsJobs:
             BloombergFetcher(),
             HackerNewsFetcher(),
             AFPFetcher(),
+            ToutiaoFetcher(),
+            BaiduFetcher(),
+            WeiboFetcher(),
         ]
         
         # 中优先级新闻源（每6小时）
@@ -39,11 +47,27 @@ class NewsJobs:
             NYTimesFetcher(),
             AlJazeeraFetcher(),
             TechCrunchFetcher(),
+            WashingtonPostFetcher(),
+            FinancialTimesFetcher(),
+            GoogleNewsFetcher(),
+            NHKWorldFetcher(),
+            JapanTimesFetcher(),
+            SCMPFetcher(),
         ]
         
         # 低优先级新闻源（每天）
         self.low_priority_fetchers = [
             ZaobaoFetcher(),
+            EconomistFetcher(),
+            ArsTechnicaFetcher(),
+            TheVergeFetcher(),
+            EightWorldFetcher(),
+            AsahiFetcher(),
+            MainichiFetcher(),
+            ShinMinFetcher(),
+            InitiumFetcher(),
+            RuanyifengFetcher(),
+            MITTechReviewFetcher(),
         ]
     
     async def fetch_high_priority_news(self):

@@ -45,8 +45,10 @@ class Database:
                     id TEXT PRIMARY KEY,
                     title TEXT NOT NULL,
                     title_zh TEXT,
+                    title_en TEXT,
                     content TEXT,
                     content_zh TEXT,
+                    content_en TEXT,
                     source TEXT NOT NULL,
                     url TEXT NOT NULL,
                     published_at TIMESTAMP NOT NULL,
@@ -110,15 +112,15 @@ class Database:
                 
                 cursor.execute("""
                     INSERT OR REPLACE INTO articles (
-                        id, title, title_zh, content, content_zh, source, url,
+                        id, title, title_zh, title_en, content, content_zh, content_en, source, url,
                         published_at, fetched_at, category, priority, tags,
                         credibility_score, fact_checked,
                         cross_references, verification_labels, warnings,
                         translated, validated
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
-                    article.id, article.title, article.title_zh,
-                    article.content, article.content_zh, article.source, article.url,
+                    article.id, article.title, article.title_zh, article.title_en,
+                    article.content, article.content_zh, article.content_en, article.source, article.url,
                     article.published_at, article.fetched_at, article.category,
                     article.priority, tags_json, article.credibility_score,
                     article.fact_checked,
@@ -250,7 +252,7 @@ class Database:
                 cursor = conn.cursor()
                 cursor.execute("""
                     SELECT * FROM articles 
-                    WHERE translated = 0 
+                    WHERE (title_zh = '' OR title_en = '' OR content_zh = '' OR content_en = '')
                     ORDER BY priority DESC, published_at DESC 
                     LIMIT ?
                 """, (limit,))
