@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全球新闻聚合</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        }
+        .news-card {
+            transition: all 0.2s ease;
+        }
+        .news-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-5xl mx-auto px-4 py-8">
+        <!-- 简洁头部 -->
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">全球新闻</h1>
+            <p class="text-gray-600">精选全球热点 · 中英双语</p>
+        </header>
+
+        <!-- 筛选器 -->
+        <form class="bg-white rounded-lg border border-gray-200 p-4 mb-6" method="get">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                <select name="source" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+                    <option value="">所有来源</option>
+                    {% for src in sources %}
+                    <option value="{{ src }}" {% if src == current_source %}selected{% endif %}>{{ src }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="category" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+                    <option value="">所有分类</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}" {% if cat == current_category %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="min_credibility" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+                    <option value="0" {% if min_credibility == 0 %}selected{% endif %}>所有可信度</option>
+                    <option value="0.8" {% if min_credibility == 0.8 %}selected{% endif %}>高可信度</option>
+                    <option value="0.6" {% if min_credibility == 0.6 %}selected{% endif %}>中等可信度</option>
+                </select>
+
+                <select name="days" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+                    <option value="1" {% if days == 1 %}selected{% endif %}>今天</option>
+                    <option value="3" {% if days == 3 %}selected{% endif %}>最近3天</option>
+                    <option value="7" {% if days == 7 %}selected{% endif %}>最近7天</option>
+                    <option value="30" {% if days == 30 %}selected{% endif %}>最近30天</option>
+                </select>
+
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
+                    筛选
+                </button>
+            </div>
+        </form>
+
+        <!-- 统计和操作 -->
+        <div class="flex items-center justify-between mb-6 text-sm">
+            <span class="text-gray-600">共 <strong class="text-gray-900">{{ total }}</strong> 条新闻</span>
+            <button onclick="batchTranslateCurrentPage()" class="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-md hover:bg-emerald-700 transition">
+                翻译当前页
+            </button>
+        </div>
+
+        <!-- 新闻列表 -->
+        <div class="space-y-4">
+            {% for article in articles %}
+            <article class="bg-white rounded-lg border border-gray-200 p-5 news-card">
+                <div class="cursor-pointer" onclick="window.location.href='/article/{{ article.id }}'">
+                    <!-- 标题 -->
+                    <h2 class="text-lg font-semibold text-gray-900 mb-2 leading-snug">
+                        {{ article.title }}
+                    </h2>
+                    {% if article.title_zh %}
+                    <p class="text-base text-gray-700 mb-3 leading-relaxed">
+                        {{ article.title_zh }}
+                    </p>
+                    {% endif %}
+                    
+                    <!-- 元信息 -->
+                    <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                        <span class="font-medium text-gray-900">{{ article.source }}</span>
+                        
+                        {% if article.category %}
+                        <span>{{ article.category }}</span>
+                        {% endif %}
+                        
+                        {% if article.credibility_score is not none %}
+                        <span class="{% if article.credibility_score >= 0.85 %}text-green-700{% elif article.credibility_score >= 0.7 %}text-blue-700{% elif article.credibility_score >= 0.5 %}text-amber-700{% else %}text-red-700{% endif %}">
+                            {{ article.credibility_score|credibility_stars }} {{ "%.2f"|format(article.credibility_score) }}
+                        </span>
+                        {% endif %}
+                        
+                        <span>{{ article.published_at|format_datetime }}</span>
+                    </div>
+                </div>
+                
+                <!-- 翻译按钮 -->
+                {% if not article.title_zh or not article.content_zh %}
+                <button onclick="event.stopPropagation(); translateItem('{{ article.id }}', this)" 
+                        class="mt-3 px-3 py-1.5 bg-emerald-500 text-white text-xs font-medium rounded hover:bg-emerald-600 transition">
+                    翻译
+                </button>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </div>
+
+        <!-- 分页 -->
+        {% if total_pages > 1 %}
+        <nav class="mt-8 flex justify-center">
+            <div class="flex items-center gap-2">
+                {% if page > 1 %}
+                <a href="?page={{ page - 1 }}&source={{ current_source }}&category={{ current_category }}&min_credibility={{ min_credibility }}&days={{ days }}" 
+                   class="px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition">
+                    上一页
+                </a>
+                {% else %}
+                <span class="px-3 py-2 text-sm text-gray-400">上一页</span>
+                {% endif %}
+
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page %}
+                    <span class="px-3 py-2 text-sm bg-blue-600 text-white rounded">{{ p }}</span>
+                    {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+                    <a href="?page={{ p }}&source={{ current_source }}&category={{ current_category }}&min_credibility={{ min_credibility }}&days={{ days }}" 
+                       class="px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition">
+                        {{ p }}
+                    </a>
+                    {% elif p == page - 3 or p == page + 3 %}
+                    <span class="px-2 text-gray-400">...</span>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page < total_pages %}
+                <a href="?page={{ page + 1 }}&source={{ current_source }}&category={{ current_category }}&min_credibility={{ min_credibility }}&days={{ days }}" 
+                   class="px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition">
+                    下一页
+                </a>
+                {% else %}
+                <span class="px-3 py-2 text-sm text-gray-400">下一页</span>
+                {% endif %}
+            </div>
+        </nav>
+        {% endif %}
+    </div>
+
+    <script>
+        // 翻译单条新闻
+        async function translateItem(articleId, btn) {
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '翻译中...';
+            btn.classList.add('opacity-50');
+
+            try {
+                const response = await fetch(`/api/translate/${articleId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('翻译失败: ' + (data.error || '未知错误'));
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('opacity-50');
+                }
+            } catch (error) {
+                alert('翻译失败: ' + error.message);
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                btn.classList.remove('opacity-50');
+            }
+        }
+
+        // 批量翻译当前页
+        async function batchTranslateCurrentPage() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '翻译中...';
+            btn.classList.add('opacity-50');
+
+            const articleIds = [];
+            document.querySelectorAll('article .cursor-pointer').forEach(el => {
+                const match = el.getAttribute('onclick').match(/\/article\/([^']+)/);
+                if (match) articleIds.push(match[1]);
+            });
+
+            if (articleIds.length === 0) {
+                alert('当前页没有新闻');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                btn.classList.remove('opacity-50');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/translate-current-page', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ article_ids: articleIds })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('批量翻译失败: ' + (data.error || '未知错误'));
+                }
+            } catch (error) {
+                alert('批量翻译失败: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                btn.classList.remove('opacity-50');
+            }
+        }
+    </script>
+</body>
+</html>

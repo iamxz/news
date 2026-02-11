@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ article.title }} - 新闻详情</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- 返回按钮 -->
+        <a href="/" class="inline-block mb-6 text-gray-600 hover:text-gray-900 transition">
+            ← 返回列表
+        </a>
+        
+        <!-- 文章内容 -->
+        <article class="bg-white rounded-lg border border-gray-200 p-6 md:p-8">
+            <!-- 标题 -->
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-3 leading-tight">
+                {{ article.title }}
+            </h1>
+            {% if article.title_zh %}
+            <h2 class="text-xl md:text-2xl text-gray-700 mb-6 leading-relaxed">
+                {{ article.title_zh }}
+            </h2>
+            {% endif %}
+
+            <!-- 元信息 -->
+            <div class="flex flex-wrap items-center gap-4 py-4 border-t border-b border-gray-200 mb-6 text-sm">
+                <span class="font-semibold text-gray-900">{{ article.source }}</span>
+                
+                {% if article.category %}
+                <span class="text-gray-600">{{ article.category }}</span>
+                {% endif %}
+                
+                {% if article.credibility_score is not none %}
+                <span class="{% if article.credibility_score >= 0.85 %}text-green-700{% elif article.credibility_score >= 0.7 %}text-blue-700{% elif article.credibility_score >= 0.5 %}text-amber-700{% else %}text-red-700{% endif %} font-medium">
+                    {{ article.credibility_score|credibility_stars }} {{ "%.2f"|format(article.credibility_score) }}
+                </span>
+                {% endif %}
+                
+                <span class="text-gray-600">{{ article.published_at|format_datetime }}</span>
+            </div>
+
+            <!-- 验证标签 -->
+            {% if article.verification_labels %}
+            <div class="flex flex-wrap gap-2 mb-6">
+                {% for label in article.verification_labels %}
+                <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                    ✓ {{ label }}
+                </span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- 警告信息 -->
+            {% if article.warnings %}
+            <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-6 text-sm">
+                <div class="font-semibold text-amber-900 mb-2">⚠️ 注意事项</div>
+                <ul class="space-y-1 text-amber-800">
+                    {% for warning in article.warnings %}
+                    <li>• {{ warning }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- 翻译按钮 -->
+            {% if not article.title_zh and not article.content_zh %}
+            <button onclick="translateArticle('{{ article.id }}')" 
+                    class="mb-6 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded hover:bg-emerald-700 transition">
+                翻译此新闻
+            </button>
+            {% endif %}
+
+            <!-- 原文内容 -->
+            {% if article.content %}
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">原文</h3>
+                <div class="text-base leading-relaxed text-gray-800 whitespace-pre-wrap">
+                    {{ article.content }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 中文翻译 -->
+            {% if article.content_zh %}
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">中文翻译</h3>
+                <div class="bg-gray-50 border-l-4 border-gray-900 p-5 text-base leading-relaxed text-gray-800 whitespace-pre-wrap">
+                    {{ article.content_zh }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 原文链接 -->
+            <a href="{{ article.url }}" target="_blank" 
+               class="inline-block px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition">
+                查看原文链接 →
+            </a>
+        </article>
+    </div>
+
+    <script>
+        async function translateArticle(articleId) {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+            btn.innerHTML = '翻译中...';
+
+            try {
+                const response = await fetch(`/api/translate/${articleId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('翻译失败: ' + (data.error || '未知错误'));
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50');
+                    btn.innerHTML = '翻译此新闻';
+                }
+            } catch (error) {
+                alert('翻译失败: ' + error.message);
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+                btn.innerHTML = '翻译此新闻';
+            }
+        }
+    </script>
+</body>
+</html>

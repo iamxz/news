@@ -361,6 +361,100 @@ class Database:
             logger.error(f"获取统计信息失败: {e}", exc_info=True)
             return {}
     
+    def count_articles(
+        self,
+        source: Optional[str] = None,
+        category: Optional[str] = None,
+        min_credibility: Optional[float] = None,
+        days: Optional[int] = None
+    ) -> int:
+        """
+        统计符合条件的新闻数量
+        
+        Args:
+            source: 筛选新闻源
+            category: 筛选分类
+            min_credibility: 最低可信度
+            days: 最近几天的新闻
+        
+        Returns:
+            新闻数量
+        """
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                
+                query = "SELECT COUNT(*) FROM articles WHERE 1=1"
+                params = []
+                
+                if source:
+                    query += " AND source = ?"
+                    params.append(source)
+                
+                if category:
+                    query += " AND category = ?"
+                    params.append(category)
+                
+                if min_credibility is not None:
+                    query += " AND credibility_score >= ?"
+                    params.append(min_credibility)
+                
+                if days:
+                    cutoff = datetime.now() - timedelta(days=days)
+                    query += " AND published_at >= ?"
+                    params.append(cutoff)
+                
+                cursor.execute(query, params)
+                return cursor.fetchone()[0]
+                
+        except Exception as e:
+            logger.error(f"统计新闻数量失败: {e}", exc_info=True)
+            return 0
+    
+    def get_all_sources(self) -> List[str]:
+        """
+        获取所有新闻源
+        
+        Returns:
+            新闻源列表
+        """
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT DISTINCT source FROM articles ORDER BY source")
+                return [row[0] for row in cursor.fetchall()]
+        except Exception as e:
+            logger.error(f"获取新闻源列表失败: {e}", exc_info=True)
+            return []
+    
+    def get_all_categories(self) -> List[str]:
+        """
+        获取所有分类
+        
+        Returns:
+            分类列表
+        """
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT DISTINCT category FROM articles WHERE category IS NOT NULL ORDER BY category")
+                return [row[0] for row in cursor.fetchall()]
+        except Exception as e:
+            logger.error(f"获取分类列表失败: {e}", exc_info=True)
+            return []
+    
+    def get_article_by_id(self, article_id: str) -> Optional[NewsArticle]:
+        """
+        根据 ID 获取新闻（别名方法）
+        
+        Args:
+            article_id: 新闻 ID
+        
+        Returns:
+            新闻对象
+        """
+        return self.get_article(article_id)
+    
     def _row_to_article(self, row: sqlite3.Row) -> NewsArticle:
         """
         将数据库行转换为 NewsArticle 对象
