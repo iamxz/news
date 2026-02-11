@@ -86,7 +86,7 @@ def admin_dashboard():
 @app.route('/admin/fetch')
 def admin_fetch():
     """抓取管理页面"""
-    from main import FETCHERS
+    from fetchers_registry import FETCHERS
     fetchers = list(FETCHERS.keys())
     return render_template('admin/fetch.html', fetchers=fetchers)
 
