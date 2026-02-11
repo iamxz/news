@@ -293,7 +293,7 @@ def api_admin_fetch():
         if not sources:
             return jsonify({'success': False, 'error': '请选择新闻源'})
         
-        from main import FETCHERS
+        from fetchers_registry import FETCHERS
         total_articles = 0
         
         for source in sources:
