@@ -19,6 +19,8 @@ from src.fetchers.nytimes import NYTimesFetcher
 from src.fetchers.aljazeera import AlJazeeraFetcher
 from src.fetchers.techcrunch import TechCrunchFetcher
 from src.fetchers.reddit import RedditFetcher
+from src.fetchers.zaobao import ZaobaoFetcher
+from src.fetchers.afp import AFPFetcher
 from src.storage.database import db
 from src.storage.models import NewsArticle
 from src.translators import translator_manager
@@ -54,6 +56,8 @@ FETCHERS = {
     'aljazeera': AlJazeeraFetcher,
     'techcrunch': TechCrunchFetcher,
     'reddit': RedditFetcher,
+    'zaobao': ZaobaoFetcher,
+    'afp': AFPFetcher,
 }
 
 
@@ -422,6 +426,65 @@ def pipeline(source):
     stats.invoke(click.Context(stats))
     
     print_success("✅ 完整流程执行完毕！")
+
+
+@cli.command()
+def daemon():
+    """
+    启动定时任务守护进程
+    
+    自动按优先级定时抓取、翻译、验证新闻
+    """
+    import asyncio
+    from src.scheduler import NewsScheduler
+    
+    print_info("🤖 启动新闻聚合守护进程...")
+    
+    scheduler = NewsScheduler()
+    scheduler.start()
+    
+    try:
+        asyncio.run(scheduler.run_forever())
+    except KeyboardInterrupt:
+        print_warning("\n停止守护进程...")
+        scheduler.stop()
+        print_success("守护进程已停止")
+
+
+@cli.command()
+@click.option('--url', '-u', default='https://www.google.com', help='测试 URL')
+def test_proxy(url):
+    """
+    测试代理配置
+    
+    示例：
+      news test-proxy
+      news test-proxy -u https://www.bbc.com
+    """
+    from src.utils.proxy import test_current_proxy, get_proxies
+    
+    proxies = get_proxies()
+    
+    if not proxies:
+        print_warning("⚠️  未配置代理")
+        print_info("如需使用代理，请在 .env 文件中配置：")
+        print_info("  HTTP_PROXY=http://127.0.0.1:7890")
+        print_info("  HTTPS_PROXY=http://127.0.0.1:7890")
+        return
+    
+    print_info(f"📡 测试代理配置...")
+    print_info(f"  HTTP:  {proxies.get('http', '未配置')}")
+    print_info(f"  HTTPS: {proxies.get('https', '未配置')}")
+    print_info(f"  测试 URL: {url}")
+    
+    if test_current_proxy():
+        print_success("✅ 代理测试成功！")
+    else:
+        print_error("❌ 代理测试失败，请检查配置")
+        print_info("\n常见问题：")
+        print_info("  1. 代理服务是否正在运行？")
+        print_info("  2. 代理地址和端口是否正确？")
+        print_info("  3. 是否需要认证？格式：http://user:pass@host:port")
 
 
 def main():

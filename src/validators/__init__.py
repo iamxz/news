@@ -5,6 +5,7 @@
 """
 from src.validators.credibility import CredibilityValidator
 from src.validators.fact_checker import FactChecker
+from src.validators.cross_reference import CrossReferenceValidator
 from src.storage.models import NewsArticle
 from src.utils.config import get_settings
 from src.utils.logger import logger
@@ -27,6 +28,10 @@ class ValidationPipeline:
         # 事实核查（可配置）
         if self.settings.enable_fact_check:
             self.validators.append(FactChecker())
+        
+        # 交叉引用验证（可配置）
+        if self.settings.cross_ref_search_enabled:
+            self.validators.append(CrossReferenceValidator())
         
         logger.info(f"验证器已加载: {[v.name for v in self.validators]}")
     

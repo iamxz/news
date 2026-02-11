@@ -10,6 +10,8 @@ from .nytimes import NYTimesFetcher
 from .aljazeera import AlJazeeraFetcher
 from .techcrunch import TechCrunchFetcher
 from .reddit import RedditFetcher
+from .zaobao import ZaobaoFetcher
+from .afp import AFPFetcher
 
 __all__ = [
     'ReutersFetcher',
@@ -22,4 +24,6 @@ __all__ = [
     'AlJazeeraFetcher',
     'TechCrunchFetcher',
     'RedditFetcher',
+    'ZaobaoFetcher',
+    'AFPFetcher',
 ]
