@@ -54,11 +54,6 @@ class WeiboFetcher(BaseFetcher):
                 logger.error("微博热搜页面请求失败")
                 return []
             
-            # 保存页面内容以便分析
-            with open('weibo_hot.html', 'w', encoding='utf-8') as f:
-                f.write(response.text)
-            logger.info("已保存微博热搜页面到 weibo_hot.html")
-            
             # 尝试再次请求，使用同一个 session
             response = self._make_request(self.hot_url, check_robots=False)
             if not response:
