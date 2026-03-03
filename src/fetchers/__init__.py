@@ -31,6 +31,8 @@ from .baidu import BaiduFetcher
 from .weibo import WeiboFetcher
 from .ruanyifeng import RuanyifengFetcher
 from .mittechreview import MITTechReviewFetcher
+from .douyin import DouyinFetcher
+from .v2ex import V2EXFetcher
 
 __all__ = [
     'ReutersFetcher',
@@ -64,4 +66,6 @@ __all__ = [
     'WeiboFetcher',
     'RuanyifengFetcher',
     'MITTechReviewFetcher',
+    'DouyinFetcher',
+    'V2EXFetcher',
 ]

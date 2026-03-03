@@ -72,10 +72,6 @@ class JapanTimesFetcher(BaseFetcher):
     def parse(self, raw_data):
         """解析原始数据（兼容基类接口）"""
         return []
-
-    def parse(self, raw_data):
-        """解析原始数据（兼容基类接口）"""
-        return []
     
     def _parse_date(self, date_str):
         """解析日期字符串"""

@@ -34,6 +34,7 @@ from src.fetchers.baidu import BaiduFetcher
 from src.fetchers.weibo import WeiboFetcher
 from src.fetchers.ruanyifeng import RuanyifengFetcher
 from src.fetchers.mittechreview import MITTechReviewFetcher
+from src.fetchers.douyin import DouyinFetcher
 
 
 # 所有可用的新闻源抓取器
@@ -69,4 +70,5 @@ FETCHERS = {
     'weibo': WeiboFetcher,
     'ruanyifeng': RuanyifengFetcher,
     'mittechreview': MITTechReviewFetcher,
+    'douyin': DouyinFetcher,
 }

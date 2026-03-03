@@ -185,17 +185,18 @@
 27. **今日头条热搜** - https://www.toutiao.com
     - 字节跳动旗下新闻聚合平台
     - 实时热点新闻和话题
-    - 使用 RSSHub: https://rsshub.app/toutiao/index
 
 28. **百度热搜** - https://www.baidu.com
     - 百度搜索热榜
     - 反映中国网民关注热点
-    - 使用 RSSHub: https://rsshub.app/baidu/trending
 
 29. **微博热搜** - https://weibo.com
     - 中国最大社交媒体平台
     - 实时热门话题和事件
-    - 使用 RSSHub: https://rsshub.app/weibo/search/hot
+
+30. **抖音热榜** - https://www.douyin.com
+    - 字节跳动旗下短视频平台
+    - 实时热门视频和话题
 
 ### 抓取优先级策略
 
@@ -209,6 +210,7 @@
 - 今日头条热搜
 - 百度热搜
 - 微博热搜
+- 抖音热榜
 
 **中优先级（每 6 小时）：**
 

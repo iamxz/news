@@ -17,9 +17,8 @@ class FinancialTimesFetcher(BaseFetcher):
     """金融时报抓取器"""
     
     def __init__(self):
-        super().__init__('Financial Times', 'https://example.com', 1.0)
-        self.rss_url = 'https://www.ft.com/?format=rss'
-    
+        super().__init__('Financial Times', 'https://www.ft.com', 1.0)
+        self.rss_url = 'https://www.ft.com/rss/home/international'
     async def fetch(self) -> List[NewsArticle]:
         """抓取新闻"""
         try:
