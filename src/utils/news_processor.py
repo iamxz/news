@@ -7,9 +7,8 @@ from datetime import datetime
 from typing import List, Dict, Tuple
 import re
 import string
+from difflib import SequenceMatcher
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 from src.storage.models import NewsArticle
 from src.utils.logger import logger
 
@@ -25,11 +24,6 @@ class NewsProcessor:
             similarity_threshold: 相似度阈值，超过此值的新闻视为相似
         """
         self.similarity_threshold = similarity_threshold
-        self.vectorizer = TfidfVectorizer(
-            stop_words='english',
-            ngram_range=(1, 2),
-            min_df=1
-        )
     
     def clean_article(self, article: NewsArticle) -> NewsArticle:
         """
@@ -81,10 +75,6 @@ class NewsProcessor:
         
         # 去除首尾空白
         text = text.strip()
-        
-        # 去除特殊字符（保留基本标点）
-        allowed_chars = string.ascii_letters + string.digits + string.punctuation + '\u4e00-\u9fff'  # 中文
-        text = ''.join(c for c in text if c in allowed_chars)
         
         return text
     
@@ -172,10 +162,9 @@ class NewsProcessor:
             return 0.0
         
         try:
-            # 向量化文本
-            vectors = self.vectorizer.fit_transform([text1, text2])
-            # 计算余弦相似度
-            similarity = cosine_similarity(vectors[0], vectors[1])[0][0]
+            # 使用 SequenceMatcher 计算相似度
+            matcher = SequenceMatcher(None, text1, text2)
+            similarity = matcher.ratio()
             return similarity
         except Exception as e:
             logger.error(f"计算相似度失败: {e}")

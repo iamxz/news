@@ -27,7 +27,7 @@ class SSPaiFetcher(BaseFetcher):
             default_delay=1.0
         )
     
-    def fetch(self) -> List[Dict]:
+    async def fetch(self) -> List[Dict]:
         """
         抓取 少数派 新闻
         

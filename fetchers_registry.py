@@ -38,6 +38,7 @@ from src.fetchers.douyin import DouyinFetcher
 from src.fetchers.wsj import WSJFetcher
 from src.fetchers.kr36 import Kr36Fetcher
 from src.fetchers.sspai import SSPaiFetcher
+from src.fetchers.v2ex import V2EXFetcher
 
 
 # 所有可用的新闻源抓取器
@@ -77,4 +78,5 @@ FETCHERS = {
     'wsj': WSJFetcher,
     '36kr': Kr36Fetcher,
     'sspai': SSPaiFetcher,
+    'v2ex': V2EXFetcher,
 }

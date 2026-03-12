@@ -305,8 +305,41 @@ def api_admin_fetch():
                 fetcher = FETCHERS[source]()
                 articles = asyncio.run(fetcher.fetch())
                 
+                # 将Dict转换为NewsArticle对象
+                from src.storage.models import NewsArticle
+                article_objects = []
+                for article_dict in articles:
+                    # 标准化新闻数据
+                    article_dict = fetcher.normalize_article(article_dict)
+                    if fetcher.validate_article(article_dict):
+                        # 创建NewsArticle对象
+                        article_obj = NewsArticle(
+                            id=article_dict.get('id'),
+                            title=article_dict.get('title'),
+                            title_zh=article_dict.get('title_zh', ''),
+                            title_en=article_dict.get('title_en', ''),
+                            content=article_dict.get('content'),
+                            content_zh=article_dict.get('content_zh', ''),
+                            content_en=article_dict.get('content_en', ''),
+                            source=article_dict.get('source'),
+                            url=article_dict.get('url'),
+                            published_at=article_dict.get('published_at'),
+                            fetched_at=article_dict.get('fetched_at', datetime.now()),
+                            category=article_dict.get('category', '综合'),
+                            priority=article_dict.get('priority', 5),
+                            tags=article_dict.get('tags', []),
+                            credibility_score=article_dict.get('credibility_score', 0.0),
+                            fact_checked=article_dict.get('fact_checked', False),
+                            cross_references=article_dict.get('cross_references', 0),
+                            verification_labels=article_dict.get('verification_labels', []),
+                            warnings=article_dict.get('warnings', []),
+                            translated=article_dict.get('translated', False),
+                            validated=article_dict.get('validated', False)
+                        )
+                        article_objects.append(article_obj)
+                
                 # 处理新闻（清洗和相似度判断）
-                processed_articles = news_processor.process_articles(articles)
+                processed_articles = news_processor.process_articles(article_objects)
                 
                 count = db.save_articles(processed_articles)
                 total_articles += count

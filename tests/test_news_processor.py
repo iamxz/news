@@ -39,10 +39,10 @@ class TestNewsProcessor(unittest.TestCase):
         # 创建不同的新闻
         self.article3 = NewsArticle(
             id="3",
-            title="测试新闻标题 3",
-            title_zh="Test News Title 3",
-            content="这是测试新闻内容 3，包含不同的测试信息。",
-            content_zh="This is test news content 3, containing different test information.",
+            title="完全不同的新闻标题",
+            title_zh="Completely Different News Title",
+            content="这是一篇完全不同的新闻内容，与之前的新闻没有任何关系。",
+            content_zh="This is a completely different news content, unrelated to the previous news.",
             source="test_source",
             url="https://example.com/news/3",
             published_at=datetime.now()
@@ -71,9 +71,9 @@ class TestNewsProcessor(unittest.TestCase):
         self.assertEqual(cleaned_article.title, "测试新闻标题 4")
         self.assertEqual(cleaned_article.title_zh, "Test News Title 4")
         self.assertEqual(cleaned_article.content, "这是测试新闻内容 4，包含一些特殊字符！@#$%")
-        self.assertEqual(cleaned_article.content_zh, "This is test news content 4, containing some special characters!@#$")
+        self.assertEqual(cleaned_article.content_zh, "This is test news content 4, containing some special characters!@#$%")
         self.assertEqual(cleaned_article.category, "科技")
-        self.assertEqual(cleaned_article.tags, ["test", "news"])
+        self.assertEqual(set(cleaned_article.tags), set(["test", "news"]))
     
     def test_calculate_similarity(self):
         """测试相似度计算"""

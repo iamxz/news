@@ -27,7 +27,7 @@ class Kr36Fetcher(BaseFetcher):
             default_delay=1.0
         )
     
-    def fetch(self) -> List[Dict]:
+    async def fetch(self) -> List[Dict]:
         """
         抓取 36氪 新闻
         
