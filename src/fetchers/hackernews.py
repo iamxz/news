@@ -23,7 +23,7 @@ class HackerNewsFetcher(BaseFetcher):
             default_delay=0.5  # API 可以更快
         )
     
-    def fetch(self) -> List[Dict]:
+    async def fetch(self) -> List[Dict]:
         """
         抓取 Hacker News 热点新闻
         

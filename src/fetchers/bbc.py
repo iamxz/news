@@ -33,7 +33,7 @@ class BBCFetcher(BaseFetcher):
             default_delay=1.0
         )
     
-    def fetch(self) -> List[Dict]:
+    async def fetch(self) -> List[Dict]:
         """
         抓取 BBC 新闻
         
@@ -46,6 +46,7 @@ class BBCFetcher(BaseFetcher):
             try:
                 logger.info(f"[{self.source_name}] 抓取 {category} 分类...")
                 
+                # 使用 feedparser 解析 RSS
                 feed = feedparser.parse(feed_url)
                 
                 if feed.bozo:

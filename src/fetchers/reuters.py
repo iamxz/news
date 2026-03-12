@@ -31,7 +31,7 @@ class ReutersFetcher(BaseFetcher):
             default_delay=1.0  # Reuters RSS 可以更频繁
         )
     
-    def fetch(self) -> List[Dict]:
+    async def fetch(self) -> List[Dict]:
         """
         抓取路透社新闻
         

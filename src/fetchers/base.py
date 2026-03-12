@@ -110,7 +110,7 @@ class BaseFetcher(ABC):
             return None
     
     @abstractmethod
-    def fetch(self) -> List[Dict]:
+    async def fetch(self) -> List[Dict]:
         """
         抓取新闻（需要子类实现）
         
@@ -196,11 +196,19 @@ class BaseFetcher(ABC):
         Returns:
             标准化后的新闻列表
         """
+        import asyncio
+        
         logger.info(f"[{self.source_name}] 开始抓取新闻...")
         
         try:
             # 抓取原始数据
-            raw_articles = self.fetch()
+            fetch_result = self.fetch()
+            
+            # 检查是否是协程对象
+            if asyncio.iscoroutine(fetch_result):
+                raw_articles = asyncio.run(fetch_result)
+            else:
+                raw_articles = fetch_result
             
             if not raw_articles:
                 logger.warning(f"[{self.source_name}] 未抓取到任何新闻")

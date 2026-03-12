@@ -36,7 +36,7 @@ class APNewsFetcher(BaseFetcher):
             default_delay=2.0  # HTML 抓取需要更礼貌
         )
     
-    def fetch(self) -> List[Dict]:
+    async def fetch(self) -> List[Dict]:
         """
         抓取美联社新闻
         

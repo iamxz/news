@@ -303,7 +303,13 @@ def api_admin_fetch():
             
             try:
                 fetcher = FETCHERS[source]()
-                articles = asyncio.run(fetcher.fetch())
+                fetch_result = fetcher.fetch()
+                
+                # 检查是否是协程对象
+                if asyncio.iscoroutine(fetch_result):
+                    articles = asyncio.run(fetch_result)
+                else:
+                    articles = fetch_result
                 
                 # 将Dict转换为NewsArticle对象
                 from src.storage.models import NewsArticle

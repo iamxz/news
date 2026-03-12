@@ -34,7 +34,7 @@ class WSJFetcher(BaseFetcher):
             default_delay=1.0
         )
     
-    def fetch(self) -> List[Dict]:
+    async def fetch(self) -> List[Dict]:
         """
         抓取 WSJ 新闻
         

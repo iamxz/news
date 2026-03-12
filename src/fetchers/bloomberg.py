@@ -32,7 +32,7 @@ class BloombergFetcher(BaseFetcher):
             default_delay=1.5  # 彭博社 RSS 延迟
         )
     
-    def fetch(self) -> List[Dict]:
+    async def fetch(self) -> List[Dict]:
         """
         抓取彭博社新闻
         
