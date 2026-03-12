@@ -58,8 +58,8 @@ class GoogleTranslator(BaseTranslator):
         if not text or not text.strip():
             return ""
         
-        max_retries = 3
-        retry_delay = 3
+        max_retries = 2
+        retry_delay = 2
         
         for attempt in range(max_retries):
             try:

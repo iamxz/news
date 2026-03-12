@@ -32,6 +32,27 @@ class TranslatorManager:
         except Exception as e:
             logger.warning(f"Google 翻译器初始化失败: {e}")
         
+        # 尝试添加 Bing 翻译（免费，无需 API key）
+        try:
+            from src.translators.bing import BingTranslator
+            translators.append(BingTranslator())
+        except Exception as e:
+            logger.warning(f"Bing 翻译器初始化失败: {e}")
+        
+        # 尝试添加 MyMemory 翻译（免费，无需 API key）
+        try:
+            from src.translators.mymemory import MyMemoryTranslator
+            translators.append(MyMemoryTranslator())
+        except Exception as e:
+            logger.warning(f"MyMemory 翻译器初始化失败: {e}")
+        
+        # 尝试添加 LibreTranslate 翻译（免费，无需 API key）
+        try:
+            from src.translators.libre import LibreTranslator
+            translators.append(LibreTranslator())
+        except Exception as e:
+            logger.warning(f"LibreTranslate 翻译器初始化失败: {e}")
+        
         # 尝试添加百度翻译（需要 API key）
         try:
             from src.translators.baidu import BaiduTranslator
@@ -60,16 +81,6 @@ class TranslatorManager:
         except Exception as e:
             logger.warning(f"OpenAI 翻译器初始化失败: {e}")
         
-        # 尝试添加 FreeTranslator
-        if FREE_TRANSLATOR_AVAILABLE:
-            try:
-                free_translator = FreeTranslator()
-                translators.append(free_translator)
-            except Exception as e:
-                logger.warning(f"FreeTranslator 初始化失败: {e}")
-        else:
-            logger.warning("FreeTranslator 不可用")
-        
         for translator in translators:
             try:
                 # 检查翻译器是否可以使用
@@ -80,8 +91,9 @@ class TranslatorManager:
                             logger.debug(f"翻译器跳过 ({translator.name}): 依赖库未安装或初始化失败")
                             continue
                 
-                # 对于 Google 翻译器，即使没有 API key 也可以使用
-                if translator.__class__.__name__ == 'GoogleTranslator':
+                # 对于免费翻译器（不需要 API key），直接加载
+                free_translators = ['GoogleTranslator', 'BingTranslator', 'MyMemoryTranslator', 'LibreTranslator']
+                if translator.__class__.__name__ in free_translators:
                     self.translators.append(translator)
                     logger.info(f"翻译器已加载: {translator.name}")
                 else:
@@ -92,9 +104,6 @@ class TranslatorManager:
                         hasattr(translator, 'translator') and translator.translator is not None
                     ) or (
                         hasattr(translator, 'session') and translator.session is not None
-                    ) or (
-                        translator.__class__.__name__ == 'FreeTranslator' and 
-                        hasattr(translator, 'translator') and translator.translator is not None
                     )
                     
                     if has_client:
@@ -146,9 +155,9 @@ class TranslatorManager:
                     logger.info(f"翻译完成: {text[:50]}")
                     return result
                 else:
-                    logger.warning(f"翻译器 {translator.name} 返回空结果")
+                    logger.warning(f"翻译器 {translator.name} 返回空结果，正在尝试下一个翻译器...")
             except Exception as e:
-                logger.warning(f"翻译器 {translator.name} 失败: {e}")
+                logger.warning(f"翻译器 {translator.name} 失败: {e}，正在尝试下一个翻译器...")
                 continue
         
         logger.error(f"所有翻译器都失败了: {text[:50]}")
