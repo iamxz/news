@@ -43,7 +43,7 @@ class BaseFetcher(ABC):
         })
         
         # 设置代理
-        if self.settings.http_proxy or self.settings.https_proxy:
+        if self.settings.enable_proxy and (self.settings.http_proxy or self.settings.https_proxy):
             session.proxies = {
                 'http': self.settings.http_proxy,
                 'https': self.settings.https_proxy

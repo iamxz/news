@@ -14,9 +14,12 @@ def get_proxies() -> Optional[Dict[str, str]]:
     获取代理配置
     
     Returns:
-        代理字典，如果未配置则返回 None
+        代理字典，如果未配置或代理开关关闭则返回 None
     """
     settings = get_settings()
+    
+    if not settings.enable_proxy:
+        return None
     
     if not settings.http_proxy and not settings.https_proxy:
         return None
@@ -73,6 +76,10 @@ def test_current_proxy() -> bool:
         代理是否可用
     """
     settings = get_settings()
+    
+    if not settings.enable_proxy:
+        logger.info("代理开关已关闭")
+        return True
     
     if not settings.http_proxy and not settings.https_proxy:
         logger.info("未配置代理")

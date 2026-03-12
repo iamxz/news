@@ -64,6 +64,7 @@ class Settings(BaseSettings):
     cross_ref_search_enabled: bool = Field(default=True, alias="CROSS_REF_SEARCH_ENABLED")
     
     # 代理配置
+    enable_proxy: bool = Field(default=False, alias="ENABLE_PROXY")
     http_proxy: Optional[str] = Field(default=None, alias="HTTP_PROXY")
     https_proxy: Optional[str] = Field(default=None, alias="HTTPS_PROXY")
     
