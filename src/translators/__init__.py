@@ -23,16 +23,10 @@ class TranslatorManager:
     
     def _init_translators(self):
         """初始化所有可用的翻译器"""
-        # 按优先级顺序添加翻译器（真正免费的在前）
+        # 按优先级顺序添加翻译器（真正免费的在前，更可靠的优先）
         translators = []
         
-        # 添加 Google 翻译（免费，无需 API key）
-        try:
-            translators.append(GoogleTranslator())
-        except Exception as e:
-            logger.warning(f"Google 翻译器初始化失败: {e}")
-        
-        # 尝试添加 Bing 翻译（免费，无需 API key）
+        # 尝试添加 Bing 翻译（免费，无需 API key，更可靠）
         try:
             from src.translators.bing import BingTranslator
             translators.append(BingTranslator())
@@ -52,6 +46,12 @@ class TranslatorManager:
             translators.append(LibreTranslator())
         except Exception as e:
             logger.warning(f"LibreTranslate 翻译器初始化失败: {e}")
+        
+        # 添加 Google 翻译（免费，无需 API key，放在后面因为经常失败）
+        try:
+            translators.append(GoogleTranslator())
+        except Exception as e:
+            logger.warning(f"Google 翻译器初始化失败: {e}")
         
         # 尝试添加百度翻译（需要 API key）
         try:
