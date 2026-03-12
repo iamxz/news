@@ -10,6 +10,7 @@ from src.storage.database import Database
 from src.translators import translator_manager
 from src.utils.config import get_settings
 from src.utils.logger import logger
+from src.utils import news_processor
 
 app = Flask(__name__)
 db = Database()
@@ -303,7 +304,11 @@ def api_admin_fetch():
             try:
                 fetcher = FETCHERS[source]()
                 articles = asyncio.run(fetcher.fetch())
-                count = db.save_articles(articles)
+                
+                # 处理新闻（清洗和相似度判断）
+                processed_articles = news_processor.process_articles(articles)
+                
+                count = db.save_articles(processed_articles)
                 total_articles += count
                 logger.info(f"{source} 抓取完成: {count} 条")
             except Exception as e:
