@@ -35,6 +35,9 @@ from src.fetchers.weibo import WeiboFetcher
 from src.fetchers.ruanyifeng import RuanyifengFetcher
 from src.fetchers.mittechreview import MITTechReviewFetcher
 from src.fetchers.douyin import DouyinFetcher
+from src.fetchers.wsj import WSJFetcher
+from src.fetchers.kr36 import Kr36Fetcher
+from src.fetchers.sspai import SSPaiFetcher
 
 
 # 所有可用的新闻源抓取器
@@ -71,4 +74,7 @@ FETCHERS = {
     'ruanyifeng': RuanyifengFetcher,
     'mittechreview': MITTechReviewFetcher,
     'douyin': DouyinFetcher,
+    'wsj': WSJFetcher,
+    '36kr': Kr36Fetcher,
+    'sspai': SSPaiFetcher,
 }

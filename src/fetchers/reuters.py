@@ -17,6 +17,7 @@ class ReutersFetcher(BaseFetcher):
     """路透社新闻抓取器"""
     
     RSS_FEEDS = {
+        'top': 'https://feeds.reuters.com/reuters/topNews',
         'world': 'https://www.reuters.com/rssfeed/worldNews',
         'business': 'https://www.reuters.com/rssfeed/businessNews',
         'technology': 'https://www.reuters.com/rssfeed/technologyNews',
@@ -130,6 +131,7 @@ class ReutersFetcher(BaseFetcher):
             标准分类名
         """
         category_map = {
+            'top': '头条',
             'world': '国际',
             'business': '财经',
             'technology': '科技',

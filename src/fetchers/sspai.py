@@ -1,7 +1,7 @@
 """
-BBC 新闻抓取器
+少数派新闻抓取器
 
-抓取 BBC News 的 RSS 订阅
+抓取 少数派 的 RSS 订阅
 """
 from datetime import datetime
 from typing import Dict, List
@@ -13,29 +13,23 @@ from src.utils.helpers import clean_html
 from src.utils.logger import logger
 
 
-class BBCFetcher(BaseFetcher):
-    """BBC 新闻抓取器"""
+class SSPaiFetcher(BaseFetcher):
+    """少数派新闻抓取器"""
     
     RSS_FEEDS = {
-        'top': 'https://feeds.bbci.co.uk/news/rss.xml',
-        'world': 'https://feeds.bbci.co.uk/news/world/rss.xml',
-        'technology': 'https://feeds.bbci.co.uk/news/technology/rss.xml',
-        'business': 'https://feeds.bbci.co.uk/news/business/rss.xml',
-        'science_and_environment': 'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',
-        'entertainment_and_arts': 'https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml',
-        'health': 'https://feeds.bbci.co.uk/news/health/rss.xml',
+        'top': 'https://sspai.com/feed',
     }
     
     def __init__(self):
         super().__init__(
-            source_name="BBC News",
-            base_url="https://www.bbc.com/news",
+            source_name="少数派",
+            base_url="https://sspai.com",
             default_delay=1.0
         )
     
     def fetch(self) -> List[Dict]:
         """
-        抓取 BBC 新闻
+        抓取 少数派 新闻
         
         Returns:
             新闻列表
@@ -105,8 +99,8 @@ class BBCFetcher(BaseFetcher):
                     'content': content,
                     'published_at': published_at,
                     'category': self._map_category(category),
-                    'priority': 8,
-                    'tags': [], # BBC RSS 通常不带 tags
+                    'priority': 5,
+                    'tags': self._extract_tags(entry),
                 }
                 
                 articles.append(article)
@@ -121,12 +115,25 @@ class BBCFetcher(BaseFetcher):
     
     def _map_category(self, rss_category: str) -> str:
         category_map = {
-            'top': '头条',
-            'world': '国际',
-            'technology': '科技',
-            'business': '财经',
-            'science_and_environment': '科学',
-            'entertainment_and_arts': '娱乐',
-            'health': '健康',
+            'top': '科技',
         }
-        return category_map.get(rss_category, '综合')
+        return category_map.get(rss_category, '科技')
+    
+    def _extract_tags(self, entry) -> List[str]:
+        """
+        从 RSS 条目中提取标签
+        
+        Args:
+            entry: RSS 条目
+        
+        Returns:
+            标签列表
+        """
+        tags = []
+        
+        if hasattr(entry, 'tags'):
+            for tag in entry.tags:
+                if hasattr(tag, 'term'):
+                    tags.append(tag.term)
+        
+        return tags[:5]  # 限制标签数量

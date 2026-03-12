@@ -1,7 +1,7 @@
 """
-BBC 新闻抓取器
+WSJ 新闻抓取器
 
-抓取 BBC News 的 RSS 订阅
+抓取 Wall Street Journal 的 RSS 订阅
 """
 from datetime import datetime
 from typing import Dict, List
@@ -13,29 +13,30 @@ from src.utils.helpers import clean_html
 from src.utils.logger import logger
 
 
-class BBCFetcher(BaseFetcher):
-    """BBC 新闻抓取器"""
+class WSJFetcher(BaseFetcher):
+    """WSJ 新闻抓取器"""
     
     RSS_FEEDS = {
-        'top': 'https://feeds.bbci.co.uk/news/rss.xml',
-        'world': 'https://feeds.bbci.co.uk/news/world/rss.xml',
-        'technology': 'https://feeds.bbci.co.uk/news/technology/rss.xml',
-        'business': 'https://feeds.bbci.co.uk/news/business/rss.xml',
-        'science_and_environment': 'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',
-        'entertainment_and_arts': 'https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml',
-        'health': 'https://feeds.bbci.co.uk/news/health/rss.xml',
+        'world': 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews',
+        'markets': 'https://feeds.content.dowjones.io/public/rss/RSSMarketsMain',
+        'us_news': 'https://feeds.content.dowjones.io/public/rss/RSSUSnews',
+        'technology': 'https://feeds.content.dowjones.io/public/rss/RSSWSJD',
+        'business': 'https://feeds.content.dowjones.io/public/rss/WSJcomUSBusiness',
+        'opinion': 'https://feeds.content.dowjones.io/public/rss/RSSOpinion',
+        'economy': 'https://feeds.content.dowjones.io/public/rss/socialeconomyfeed',
+        'politics': 'https://feeds.content.dowjones.io/public/rss/socialpoliticsfeed',
     }
     
     def __init__(self):
         super().__init__(
-            source_name="BBC News",
-            base_url="https://www.bbc.com/news",
+            source_name="Wall Street Journal",
+            base_url="https://www.wsj.com",
             default_delay=1.0
         )
     
     def fetch(self) -> List[Dict]:
         """
-        抓取 BBC 新闻
+        抓取 WSJ 新闻
         
         Returns:
             新闻列表
@@ -106,7 +107,7 @@ class BBCFetcher(BaseFetcher):
                     'published_at': published_at,
                     'category': self._map_category(category),
                     'priority': 8,
-                    'tags': [], # BBC RSS 通常不带 tags
+                    'tags': [],
                 }
                 
                 articles.append(article)
@@ -121,12 +122,13 @@ class BBCFetcher(BaseFetcher):
     
     def _map_category(self, rss_category: str) -> str:
         category_map = {
-            'top': '头条',
             'world': '国际',
+            'markets': '市场',
+            'us_news': '美国新闻',
             'technology': '科技',
-            'business': '财经',
-            'science_and_environment': '科学',
-            'entertainment_and_arts': '娱乐',
-            'health': '健康',
+            'business': '商业',
+            'opinion': '观点',
+            'economy': '经济',
+            'politics': '政治',
         }
         return category_map.get(rss_category, '综合')
