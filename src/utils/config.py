@@ -50,7 +50,7 @@ class Settings(BaseSettings):
     
     # 抓取配置
     fetch_interval: str = Field(default="6h", alias="FETCH_INTERVAL")
-    max_news_per_source: int = Field(default=20, alias="MAX_NEWS_PER_SOURCE")
+    max_news_per_source: int = Field(default=99999, alias="MAX_NEWS_PER_SOURCE")
     news_retention_days: int = Field(default=30, alias="NEWS_RETENTION_DAYS")
     user_agent: str = Field(
         default="NewsAggregator/1.0 (+https://github.com/yourname/news)",

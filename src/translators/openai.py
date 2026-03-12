@@ -20,11 +20,28 @@ class OpenAITranslator(BaseTranslator):
         super().__init__("OpenAI")
         self.settings = get_settings()
         
+        # 获取代理配置
+        from src.utils.proxy import get_proxies
+        proxies = get_proxies()
+        
         if not self.settings.openai_api_key:
             logger.warning("OpenAI API key 未配置")
             self.client = None
         else:
-            self.client = OpenAI(api_key=self.settings.openai_api_key)
+            # 配置 OpenAI 客户端
+            client_kwargs = {
+                "api_key": self.settings.openai_api_key
+            }
+            
+            # 如果有代理配置，添加到客户端
+            if proxies:
+                logger.info(f"[{self.name}] 已配置代理: {proxies}")
+                # OpenAI 客户端使用 http_client 来配置代理
+                import httpx
+                http_client = httpx.Client(proxies=proxies)
+                client_kwargs["http_client"] = http_client
+            
+            self.client = OpenAI(**client_kwargs)
     
     def translate(
         self,

@@ -25,7 +25,40 @@ class TranslatorManager:
         """初始化所有可用的翻译器"""
         # 按优先级顺序添加翻译器（真正免费的在前）
         translators = []
-        translators.append(GoogleTranslator())      # Google 翻译（免费，无需 API key）
+        
+        # 添加 Google 翻译（免费，无需 API key）
+        try:
+            translators.append(GoogleTranslator())
+        except Exception as e:
+            logger.warning(f"Google 翻译器初始化失败: {e}")
+        
+        # 尝试添加百度翻译（需要 API key）
+        try:
+            from src.translators.baidu import BaiduTranslator
+            translators.append(BaiduTranslator())
+        except Exception as e:
+            logger.warning(f"百度翻译器初始化失败: {e}")
+        
+        # 尝试添加微软翻译（需要 API key）
+        try:
+            from src.translators.microsoft import MicrosoftTranslator
+            translators.append(MicrosoftTranslator())
+        except Exception as e:
+            logger.warning(f"微软翻译器初始化失败: {e}")
+        
+        # 尝试添加 DeepL 翻译（需要 API key）
+        try:
+            from src.translators.deepl import DeepLTranslator
+            translators.append(DeepLTranslator())
+        except Exception as e:
+            logger.warning(f"DeepL 翻译器初始化失败: {e}")
+        
+        # 尝试添加 OpenAI 翻译（需要 API key）
+        try:
+            from src.translators.openai import OpenAITranslator
+            translators.append(OpenAITranslator())
+        except Exception as e:
+            logger.warning(f"OpenAI 翻译器初始化失败: {e}")
         
         # 尝试添加 FreeTranslator
         if FREE_TRANSLATOR_AVAILABLE:
@@ -47,23 +80,28 @@ class TranslatorManager:
                             logger.debug(f"翻译器跳过 ({translator.name}): 依赖库未安装或初始化失败")
                             continue
                 
-                # 检查其他翻译器是否有有效的客户端
-                has_client = (
-                    hasattr(translator, 'client') and translator.client is not None
-                ) or (
-                    hasattr(translator, 'translator') and translator.translator is not None
-                ) or (
-                    hasattr(translator, 'session') and translator.session is not None
-                ) or (
-                    translator.__class__.__name__ == 'FreeTranslator' and 
-                    hasattr(translator, 'translator') and translator.translator is not None
-                )
-                
-                if has_client:
+                # 对于 Google 翻译器，即使没有 API key 也可以使用
+                if translator.__class__.__name__ == 'GoogleTranslator':
                     self.translators.append(translator)
                     logger.info(f"翻译器已加载: {translator.name}")
                 else:
-                    logger.debug(f"翻译器跳过 ({translator.name}): API key 未配置或初始化失败")
+                    # 检查其他翻译器是否有有效的客户端
+                    has_client = (
+                        hasattr(translator, 'client') and translator.client is not None
+                    ) or (
+                        hasattr(translator, 'translator') and translator.translator is not None
+                    ) or (
+                        hasattr(translator, 'session') and translator.session is not None
+                    ) or (
+                        translator.__class__.__name__ == 'FreeTranslator' and 
+                        hasattr(translator, 'translator') and translator.translator is not None
+                    )
+                    
+                    if has_client:
+                        self.translators.append(translator)
+                        logger.info(f"翻译器已加载: {translator.name}")
+                    else:
+                        logger.debug(f"翻译器跳过 ({translator.name}): API key 未配置或初始化失败")
             except Exception as e:
                 logger.warning(f"翻译器初始化失败 ({translator.name}): {e}")
         
@@ -102,9 +140,13 @@ class TranslatorManager:
         # 尝试使用每个翻译器
         for translator in self.translators:
             try:
+                logger.info(f"尝试使用翻译器: {translator.name}")
                 result = translator.translate(text, source_lang, target_lang)
                 if result:
+                    logger.info(f"翻译完成: {text[:50]}")
                     return result
+                else:
+                    logger.warning(f"翻译器 {translator.name} 返回空结果")
             except Exception as e:
                 logger.warning(f"翻译器 {translator.name} 失败: {e}")
                 continue

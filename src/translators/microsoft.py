@@ -27,6 +27,12 @@ class MicrosoftTranslator(BaseTranslator):
         self.subscription_key = getattr(self.settings, 'microsoft_translator_key', None)
         self.region = getattr(self.settings, 'microsoft_translator_region', 'global')
         
+        # 获取代理配置
+        from src.utils.proxy import get_proxies
+        self.proxies = get_proxies()
+        if self.proxies:
+            logger.info(f"[{self.name}] 已配置代理: {self.proxies}")
+        
         if not self.subscription_key:
             logger.warning(f"[{self.name}] 微软翻译密钥未配置")
             self.translator = None
@@ -92,6 +98,7 @@ class MicrosoftTranslator(BaseTranslator):
                 params=params,
                 headers=headers,
                 json=body,
+                proxies=self.proxies,
                 timeout=10
             )
             response.raise_for_status()
@@ -164,6 +171,7 @@ class MicrosoftTranslator(BaseTranslator):
                 params=params,
                 headers=headers,
                 json=body,
+                proxies=self.proxies,
                 timeout=30
             )
             response.raise_for_status()

@@ -27,6 +27,12 @@ class BaiduTranslator(BaseTranslator):
         self.app_id = getattr(self.settings, 'baidu_app_id', None)
         self.secret_key = getattr(self.settings, 'baidu_secret_key', None)
         
+        # 获取代理配置
+        from src.utils.proxy import get_proxies
+        self.proxies = get_proxies()
+        if self.proxies:
+            logger.info(f"[{self.name}] 已配置代理: {self.proxies}")
+        
         if not self.app_id or not self.secret_key:
             logger.warning(f"[{self.name}] 百度翻译 APP ID 或密钥未配置")
             self.translator = None
@@ -105,7 +111,7 @@ class BaiduTranslator(BaseTranslator):
             }
             
             # 发送请求
-            response = requests.get(self.API_URL, params=params, timeout=10)
+            response = requests.get(self.API_URL, params=params, proxies=self.proxies, timeout=10)
             response.raise_for_status()
             
             result = response.json()
