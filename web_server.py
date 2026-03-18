@@ -259,9 +259,13 @@ def api_admin_fetch():
                 # 将Dict转换为NewsArticle对象
                 from src.storage.models import NewsArticle
                 article_objects = []
-                for article_dict in articles:
+                for item in articles:
+                    if isinstance(item, NewsArticle):
+                        article_objects.append(item)
+                        continue
+                        
                     # 标准化新闻数据
-                    article_dict = fetcher.normalize_article(article_dict)
+                    article_dict = fetcher.normalize_article(item)
                     if fetcher.validate_article(article_dict):
                         # 创建NewsArticle对象
                         article_obj = NewsArticle(
