@@ -6,14 +6,14 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 from datetime import datetime, timedelta
 import asyncio
-from src.storage.database import Database
+from src.storage.database import db  # 复用全局单例，避免重复创建连接
 from src.translators import translator_manager
 from src.utils.config import get_settings
 from src.utils.logger import logger
 from src.utils import news_processor
+from src.utils.translation_helper import translate_article as _do_translate
 
 app = Flask(__name__)
-db = Database()
 
 # 每页显示的新闻数量
 PER_PAGE = 20
@@ -88,8 +88,29 @@ def admin_dashboard():
 def admin_fetch():
     """抓取管理页面"""
     from fetchers_registry import FETCHERS
-    fetchers = list(FETCHERS.keys())
-    return render_template('admin/fetch.html', fetchers=fetchers)
+    
+    japanese_sources = {'nhkworld', 'asahi', 'mainichi', 'japantimes'}
+    chinese_sources = {
+        'zaobao', 'eightworld', 'shinmin', 'scmp', 'initium', 
+        'toutiao', 'baidu', 'weibo', 'ruanyifeng', 'mittechreview', 
+        'douyin', '36kr', 'sspai', 'v2ex'
+    }
+    
+    categorized_fetchers = {
+        '国际媒体': [],
+        '日本媒体': [],
+        '中文媒体': []
+    }
+    
+    for key in FETCHERS.keys():
+        if key in japanese_sources:
+            categorized_fetchers['日本媒体'].append(key)
+        elif key in chinese_sources:
+            categorized_fetchers['中文媒体'].append(key)
+        else:
+            categorized_fetchers['国际媒体'].append(key)
+            
+    return render_template('admin/fetch.html', categorized_fetchers=categorized_fetchers, total_count=len(FETCHERS))
 
 
 @app.route('/admin/translate')
@@ -128,8 +149,8 @@ def translate_article(article_id):
         article = db.get_article_by_id(article_id)
         if not article:
             return jsonify({'success': False, 'error': '新闻不存在'}), 404
-        
-        # 检查是否已有完整翻译
+
+        # 已有完整翻译则直接返回
         if article.title_zh and article.title_en and article.content_zh and article.content_en:
             return jsonify({
                 'success': True,
@@ -139,52 +160,12 @@ def translate_article(article_id):
                 'content_en': article.content_en,
                 'message': '已有翻译'
             })
-        
+
         logger.info(f"开始翻译新闻: {article.title[:50]}")
-        
-        # 判断来源语言
-        japanese_sources = ['NHK World', 'Asahi Shimbun', 'The Japan Times', 'Mainichi']
-        chinese_sources = ['今日头条', '百度热搜', '微博热搜', '联合早报', '8视界', '新明日报', '南华早报', '端传媒']
-        is_japanese = article.source in japanese_sources
-        is_chinese = article.source in chinese_sources
-        
-        # 翻译标题和内容
-        if is_japanese:
-            # 日文 -> 英文和中文
-            if not article.title_en:
-                article.title_en = translator_manager.translate(article.title, source_lang='ja', target_lang='en') if article.title else ''
-            if not article.title_zh:
-                article.title_zh = translator_manager.translate(article.title, source_lang='ja', target_lang='zh') if article.title else ''
-            if not article.content_en:
-                article.content_en = translator_manager.translate(article.content, source_lang='ja', target_lang='en') if article.content else ''
-            if not article.content_zh:
-                article.content_zh = translator_manager.translate(article.content, source_lang='ja', target_lang='zh') if article.content else ''
-        elif is_chinese:
-            # 中文 -> 英文，原文作为中文
-            if not article.title_zh:
-                article.title_zh = article.title
-            if not article.title_en:
-                article.title_en = translator_manager.translate(article.title, source_lang='zh', target_lang='en') if article.title else ''
-            if not article.content_zh:
-                article.content_zh = article.content
-            if not article.content_en:
-                article.content_en = translator_manager.translate(article.content, source_lang='zh', target_lang='en') if article.content else ''
-        else:
-            # 英文 -> 中文，原文作为英文
-            if not article.title_en:
-                article.title_en = article.title
-            if not article.title_zh:
-                article.title_zh = translator_manager.translate(article.title, source_lang='en', target_lang='zh') if article.title else ''
-            if not article.content_en:
-                article.content_en = article.content
-            if not article.content_zh:
-                article.content_zh = translator_manager.translate(article.content, source_lang='en', target_lang='zh') if article.content else ''
-        
-        article.translated = True
+        _do_translate(article, translator_manager)
         db.save_article(article)
-        
         logger.info(f"翻译完成: {article.title[:50]}")
-        
+
         return jsonify({
             'success': True,
             'title_zh': article.title_zh,
@@ -193,7 +174,7 @@ def translate_article(article_id):
             'content_en': article.content_en,
             'message': '翻译成功'
         })
-        
+
     except Exception as e:
         logger.error(f"翻译失败: {e}", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -205,72 +186,36 @@ def translate_current_page():
     try:
         data = request.get_json()
         article_ids = data.get('article_ids', [])
-        
+
         if not article_ids:
             return jsonify({'success': False, 'error': '没有提供新闻 ID'})
-        
+
         translated_count = 0
         skipped_count = 0
-        
+
         for article_id in article_ids:
             try:
                 article = db.get_article_by_id(article_id)
                 if not article:
                     continue
-                
-                # 检查是否已有完整翻译
+
                 if article.title_zh and article.title_en and article.content_zh and article.content_en:
                     skipped_count += 1
                     continue
-                
-                # 判断来源语言
-                japanese_sources = ['NHK World', 'Asahi Shimbun', 'The Japan Times', 'Mainichi']
-                chinese_sources = ['今日头条', '百度热搜', '微博热搜', '联合早报', '8视界', '新明日报', '南华早报', '端传媒']
-                is_japanese = article.source in japanese_sources
-                is_chinese = article.source in chinese_sources
-                
-                # 翻译
-                if is_japanese:
-                    if not article.title_en:
-                        article.title_en = translator_manager.translate(article.title, source_lang='ja', target_lang='en') if article.title else ''
-                    if not article.title_zh:
-                        article.title_zh = translator_manager.translate(article.title, source_lang='ja', target_lang='zh') if article.title else ''
-                    if not article.content_en:
-                        article.content_en = translator_manager.translate(article.content, source_lang='ja', target_lang='en') if article.content else ''
-                    if not article.content_zh:
-                        article.content_zh = translator_manager.translate(article.content, source_lang='ja', target_lang='zh') if article.content else ''
-                elif is_chinese:
-                    if not article.title_zh:
-                        article.title_zh = article.title
-                    if not article.title_en:
-                        article.title_en = translator_manager.translate(article.title, source_lang='zh', target_lang='en') if article.title else ''
-                    if not article.content_zh:
-                        article.content_zh = article.content
-                    if not article.content_en:
-                        article.content_en = translator_manager.translate(article.content, source_lang='zh', target_lang='en') if article.content else ''
-                else:
-                    if not article.title_en:
-                        article.title_en = article.title
-                    if not article.title_zh:
-                        article.title_zh = translator_manager.translate(article.title, source_lang='en', target_lang='zh') if article.title else ''
-                    if not article.content_en:
-                        article.content_en = article.content
-                    if not article.content_zh:
-                        article.content_zh = translator_manager.translate(article.content, source_lang='en', target_lang='zh') if article.content else ''
-                
-                article.translated = True
+
+                _do_translate(article, translator_manager)
                 db.save_article(article)
                 translated_count += 1
                 logger.info(f"翻译完成: {article.title[:50]}")
-                    
+
             except Exception as e:
                 logger.error(f"翻译新闻失败 {article_id}: {e}")
                 continue
-        
+
         message = f'成功翻译 {translated_count} 条新闻'
         if skipped_count > 0:
             message += f'，跳过 {skipped_count} 条已翻译的新闻'
-        
+
         return jsonify({
             'success': True,
             'translated': translated_count,
@@ -278,7 +223,7 @@ def translate_current_page():
             'total': len(article_ids),
             'message': message
         })
-        
+
     except Exception as e:
         logger.error(f"批量翻译当前页失败: {e}", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -371,65 +316,28 @@ def api_admin_translate_all():
     try:
         data = request.get_json()
         limit = data.get('limit', 50)
-        
+
         articles = db.get_untranslated_articles(limit=limit)
-        
         if not articles:
             return jsonify({'success': True, 'translated': 0, 'message': '没有需要翻译的新闻'})
-        
+
         translated_count = 0
         for article in articles:
             try:
-                # 判断来源语言
-                japanese_sources = ['NHK World', 'Asahi Shimbun', 'The Japan Times', 'Mainichi']
-                chinese_sources = ['今日头条', '百度热搜', '微博热搜', '联合早报', '8视界', '新明日报', '南华早报', '端传媒']
-                is_japanese = article.source in japanese_sources
-                is_chinese = article.source in chinese_sources
-                
-                # 翻译
-                if is_japanese:
-                    if not article.title_en:
-                        article.title_en = translator_manager.translate(article.title, source_lang='ja', target_lang='en') if article.title else ''
-                    if not article.title_zh:
-                        article.title_zh = translator_manager.translate(article.title, source_lang='ja', target_lang='zh') if article.title else ''
-                    if not article.content_en:
-                        article.content_en = translator_manager.translate(article.content, source_lang='ja', target_lang='en') if article.content else ''
-                    if not article.content_zh:
-                        article.content_zh = translator_manager.translate(article.content, source_lang='ja', target_lang='zh') if article.content else ''
-                elif is_chinese:
-                    if not article.title_zh:
-                        article.title_zh = article.title
-                    if not article.title_en:
-                        article.title_en = translator_manager.translate(article.title, source_lang='zh', target_lang='en') if article.title else ''
-                    if not article.content_zh:
-                        article.content_zh = article.content
-                    if not article.content_en:
-                        article.content_en = translator_manager.translate(article.content, source_lang='zh', target_lang='en') if article.content else ''
-                else:
-                    if not article.title_en:
-                        article.title_en = article.title
-                    if not article.title_zh:
-                        article.title_zh = translator_manager.translate(article.title, source_lang='en', target_lang='zh') if article.title else ''
-                    if not article.content_en:
-                        article.content_en = article.content
-                    if not article.content_zh:
-                        article.content_zh = translator_manager.translate(article.content, source_lang='en', target_lang='zh') if article.content else ''
-                
-                article.translated = True
+                _do_translate(article, translator_manager)
                 db.save_article(article)
                 translated_count += 1
-                    
             except Exception as e:
                 logger.error(f"翻译新闻失败 {article.id}: {e}")
                 continue
-        
+
         return jsonify({
             'success': True,
             'translated': translated_count,
             'total': len(articles),
             'message': f'成功翻译 {translated_count}/{len(articles)} 条新闻'
         })
-        
+
     except Exception as e:
         logger.error(f"批量翻译失败: {e}", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500

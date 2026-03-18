@@ -224,85 +224,45 @@ class NewsProcessor:
     def merge_similar_articles(self, articles: List[NewsArticle]) -> NewsArticle:
         """
         合并相似的新闻
-        
+
         Args:
             articles: 相似新闻列表
-        
+
         Returns:
             合并后的新闻
         """
         if not articles:
             raise ValueError("新闻列表不能为空")
-        
         if len(articles) == 1:
             return articles[0]
-        
-        # 选择发布时间最早的作为基础
+
+        # 选择发布时间最早的作为基础，用 model_copy 克隆避免逐字段枚举
         base_article = min(articles, key=lambda x: x.published_at)
-        
-        # 合并信息
-        merged_article = NewsArticle(
-            id=base_article.id,
-            title=base_article.title,
-            title_zh=base_article.title_zh,
-            title_en=base_article.title_en,
-            content=base_article.content,
-            content_zh=base_article.content_zh,
-            content_en=base_article.content_en,
-            source=base_article.source,
-            url=base_article.url,
-            published_at=base_article.published_at,
-            fetched_at=datetime.now(),
-            category=base_article.category,
-            priority=base_article.priority,
-            tags=base_article.tags,
-            credibility_score=base_article.credibility_score,
-            fact_checked=base_article.fact_checked,
-            cross_references=base_article.cross_references,
-            verification_labels=base_article.verification_labels,
-            warnings=base_article.warnings,
-            translated=base_article.translated,
-            validated=base_article.validated
-        )
-        
-        # 合并其他新闻的信息（补充缺失的内容）
+        merged_article = base_article.model_copy(update={'fetched_at': datetime.now()})
+
+        # 遍历其他新闻，补充缺失字段并合并集合类数据
         for article in articles:
-            if article != base_article:
-                # 补充标题
-                if not merged_article.title and article.title:
-                    merged_article.title = article.title
-                if not merged_article.title_zh and article.title_zh:
-                    merged_article.title_zh = article.title_zh
-                if not merged_article.title_en and article.title_en:
-                    merged_article.title_en = article.title_en
-                
-                # 补充内容
-                if not merged_article.content and article.content:
-                    merged_article.content = article.content
-                if not merged_article.content_zh and article.content_zh:
-                    merged_article.content_zh = article.content_zh
-                if not merged_article.content_en and article.content_en:
-                    merged_article.content_en = article.content_en
-                
-                # 合并标签
-                merged_article.tags = list(set(merged_article.tags + article.tags))
-                
-                # 合并验证标签
-                merged_article.verification_labels = list(set(merged_article.verification_labels + article.verification_labels))
-                
-                # 合并警告信息
-                merged_article.warnings = list(set(merged_article.warnings + article.warnings))
-                
-                # 取最高的可信度评分
-                if article.credibility_score > merged_article.credibility_score:
-                    merged_article.credibility_score = article.credibility_score
-                
-                # 增加交叉引用计数
-                merged_article.cross_references += article.cross_references + 1
-        
-        # 标记为已验证
+            if article == base_article:
+                continue
+
+            # 补充标题和内容（仅填充空缺）
+            for field in ('title', 'title_zh', 'title_en', 'content', 'content_zh', 'content_en'):
+                if not getattr(merged_article, field) and getattr(article, field):
+                    setattr(merged_article, field, getattr(article, field))
+
+            # 合并集合类字段
+            merged_article.tags = list(set(merged_article.tags + article.tags))
+            merged_article.verification_labels = list(
+                set(merged_article.verification_labels + article.verification_labels)
+            )
+            merged_article.warnings = list(set(merged_article.warnings + article.warnings))
+
+            # 取最高可信度，累计交叉引用
+            if article.credibility_score > merged_article.credibility_score:
+                merged_article.credibility_score = article.credibility_score
+            merged_article.cross_references += article.cross_references + 1
+
         merged_article.validated = True
-        
         return merged_article
     
     def process_articles(self, articles: List[NewsArticle]) -> List[NewsArticle]:

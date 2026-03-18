@@ -3,10 +3,11 @@
 
 使用 SQLite 进行数据存储
 """
+import json
 import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Tuple
 
 from src.storage.models import NewsArticle
 from src.utils.config import get_settings
@@ -103,9 +104,7 @@ class Database:
         try:
             with self._get_connection() as conn:
                 cursor = conn.cursor()
-                
-                # 将列表转换为 JSON 字符串
-                import json
+
                 tags_json = json.dumps(article.tags, ensure_ascii=False)
                 labels_json = json.dumps(article.verification_labels, ensure_ascii=False)
                 warnings_json = json.dumps(article.warnings, ensure_ascii=False)
@@ -138,19 +137,52 @@ class Database:
     
     def save_articles(self, articles: List[NewsArticle]) -> int:
         """
-        批量保存新闻
-        
+        批量保存新闻（单次连接 + 事务批量插入，减少数据库 open/close 开销）
+
         Args:
             articles: 新闻列表
-        
+
         Returns:
             成功保存的数量
         """
+        if not articles:
+            return 0
+
         count = 0
-        for article in articles:
-            if self.save_article(article):
-                count += 1
-        
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                for article in articles:
+                    try:
+                        tags_json = json.dumps(article.tags, ensure_ascii=False)
+                        labels_json = json.dumps(article.verification_labels, ensure_ascii=False)
+                        warnings_json = json.dumps(article.warnings, ensure_ascii=False)
+
+                        cursor.execute("""
+                            INSERT OR REPLACE INTO articles (
+                                id, title, title_zh, title_en, content, content_zh, content_en,
+                                source, url, published_at, fetched_at, category, priority, tags,
+                                credibility_score, fact_checked,
+                                cross_references, verification_labels, warnings,
+                                translated, validated
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (
+                            article.id, article.title, article.title_zh, article.title_en,
+                            article.content, article.content_zh, article.content_en,
+                            article.source, article.url,
+                            article.published_at, article.fetched_at, article.category,
+                            article.priority, tags_json, article.credibility_score,
+                            article.fact_checked,
+                            article.cross_references, labels_json, warnings_json,
+                            article.translated, article.validated
+                        ))
+                        count += 1
+                    except Exception as e:
+                        logger.error(f"批量保存中单条失败: {e}")
+                conn.commit()
+        except Exception as e:
+            logger.error(f"批量保存新闻失败: {e}", exc_info=True)
+
         logger.info(f"批量保存新闻: {count}/{len(articles)} 成功")
         return count
     
@@ -178,6 +210,38 @@ class Database:
             logger.error(f"获取新闻失败: {e}", exc_info=True)
             return None
     
+    def _build_filter_clause(
+        self,
+        source: Optional[str],
+        category: Optional[str],
+        min_credibility: Optional[float],
+        days: Optional[int],
+    ) -> Tuple[str, list]:
+        """
+        构建公共过滤条件，供 get_articles 和 count_articles 共用。
+
+        Returns:
+            (where_clause, params) — where_clause 以 'WHERE 1=1' 开头
+        """
+        clause = "WHERE 1=1"
+        params: list = []
+
+        if source:
+            clause += " AND source = ?"
+            params.append(source)
+        if category:
+            clause += " AND category = ?"
+            params.append(category)
+        if min_credibility is not None:
+            clause += " AND credibility_score >= ?"
+            params.append(min_credibility)
+        if days:
+            cutoff = datetime.now() - timedelta(days=days)
+            clause += " AND published_at >= ?"
+            params.append(cutoff)
+
+        return clause, params
+
     def get_articles(
         self,
         limit: int = 20,
@@ -189,7 +253,7 @@ class Database:
     ) -> List[NewsArticle]:
         """
         获取新闻列表
-        
+
         Args:
             limit: 返回数量限制
             offset: 偏移量
@@ -197,42 +261,18 @@ class Database:
             category: 筛选分类
             min_credibility: 最低可信度
             days: 最近几天的新闻
-        
+
         Returns:
             新闻列表
         """
         try:
             with self._get_connection() as conn:
                 cursor = conn.cursor()
-                
-                query = "SELECT * FROM articles WHERE 1=1"
-                params = []
-                
-                if source:
-                    query += " AND source = ?"
-                    params.append(source)
-                
-                if category:
-                    query += " AND category = ?"
-                    params.append(category)
-                
-                if min_credibility is not None:
-                    query += " AND credibility_score >= ?"
-                    params.append(min_credibility)
-                
-                if days:
-                    cutoff = datetime.now() - timedelta(days=days)
-                    query += " AND published_at >= ?"
-                    params.append(cutoff)
-                
-                query += " ORDER BY published_at DESC LIMIT ? OFFSET ?"
+                where, params = self._build_filter_clause(source, category, min_credibility, days)
+                query = f"SELECT * FROM articles {where} ORDER BY published_at DESC LIMIT ? OFFSET ?"
                 params.extend([limit, offset])
-                
                 cursor.execute(query, params)
-                rows = cursor.fetchall()
-                
-                return [self._row_to_article(row) for row in rows]
-                
+                return [self._row_to_article(row) for row in cursor.fetchall()]
         except Exception as e:
             logger.error(f"获取新闻列表失败: {e}", exc_info=True)
             return []
@@ -372,43 +412,22 @@ class Database:
     ) -> int:
         """
         统计符合条件的新闻数量
-        
+
         Args:
             source: 筛选新闻源
             category: 筛选分类
             min_credibility: 最低可信度
             days: 最近几天的新闻
-        
+
         Returns:
             新闻数量
         """
         try:
             with self._get_connection() as conn:
                 cursor = conn.cursor()
-                
-                query = "SELECT COUNT(*) FROM articles WHERE 1=1"
-                params = []
-                
-                if source:
-                    query += " AND source = ?"
-                    params.append(source)
-                
-                if category:
-                    query += " AND category = ?"
-                    params.append(category)
-                
-                if min_credibility is not None:
-                    query += " AND credibility_score >= ?"
-                    params.append(min_credibility)
-                
-                if days:
-                    cutoff = datetime.now() - timedelta(days=days)
-                    query += " AND published_at >= ?"
-                    params.append(cutoff)
-                
-                cursor.execute(query, params)
+                where, params = self._build_filter_clause(source, category, min_credibility, days)
+                cursor.execute(f"SELECT COUNT(*) FROM articles {where}", params)
                 return cursor.fetchone()[0]
-                
         except Exception as e:
             logger.error(f"统计新闻数量失败: {e}", exc_info=True)
             return 0
@@ -459,22 +478,22 @@ class Database:
     
     def _row_to_article(self, row: sqlite3.Row) -> NewsArticle:
         """
-        将数据库行转换为 NewsArticle 对象
-        
+        将数据库行转换为 NewsArticle 对象。
+
         Args:
             row: 数据库行
-        
+
         Returns:
             NewsArticle 对象
         """
-        import json
-        
         return NewsArticle(
             id=row['id'],
             title=row['title'],
             title_zh=row['title_zh'] or '',
+            title_en=row['title_en'] or '',   # 修复：此前遗漏了 title_en
             content=row['content'] or '',
             content_zh=row['content_zh'] or '',
+            content_en=row['content_en'] or '',  # 修复：此前遗漏了 content_en
             source=row['source'],
             url=row['url'],
             published_at=datetime.fromisoformat(row['published_at']),
