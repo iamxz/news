@@ -10,7 +10,6 @@ from .nytimes import NYTimesFetcher
 from .aljazeera import AlJazeeraFetcher
 from .techcrunch import TechCrunchFetcher
 from .reddit import RedditFetcher
-from .zaobao import ZaobaoFetcher
 from .afp import AFPFetcher
 from .washingtonpost import WashingtonPostFetcher
 from .financialtimes import FinancialTimesFetcher
@@ -19,10 +18,6 @@ from .arstechnica import ArsTechnicaFetcher
 from .theverge import TheVergeFetcher
 from .googlenews import GoogleNewsFetcher
 from .eightworld import EightWorldFetcher
-from .nhkworld import NHKWorldFetcher
-from .asahi import AsahiFetcher
-from .mainichi import MainichiFetcher
-from .japantimes import JapanTimesFetcher
 from .shinmin import ShinMinFetcher
 from .scmp import SCMPFetcher
 from .initium import InitiumFetcher
@@ -45,7 +40,6 @@ __all__ = [
     'AlJazeeraFetcher',
     'TechCrunchFetcher',
     'RedditFetcher',
-    'ZaobaoFetcher',
     'AFPFetcher',
     'WashingtonPostFetcher',
     'FinancialTimesFetcher',
@@ -54,10 +48,6 @@ __all__ = [
     'TheVergeFetcher',
     'GoogleNewsFetcher',
     'EightWorldFetcher',
-    'NHKWorldFetcher',
-    'AsahiFetcher',
-    'MainichiFetcher',
-    'JapanTimesFetcher',
     'ShinMinFetcher',
     'SCMPFetcher',
     'InitiumFetcher',

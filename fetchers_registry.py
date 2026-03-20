@@ -13,7 +13,6 @@ from src.fetchers.nytimes import NYTimesFetcher
 from src.fetchers.aljazeera import AlJazeeraFetcher
 from src.fetchers.techcrunch import TechCrunchFetcher
 from src.fetchers.reddit import RedditFetcher
-from src.fetchers.zaobao import ZaobaoFetcher
 from src.fetchers.afp import AFPFetcher
 from src.fetchers.washingtonpost import WashingtonPostFetcher
 from src.fetchers.financialtimes import FinancialTimesFetcher
@@ -22,10 +21,6 @@ from src.fetchers.arstechnica import ArsTechnicaFetcher
 from src.fetchers.theverge import TheVergeFetcher
 from src.fetchers.googlenews import GoogleNewsFetcher
 from src.fetchers.eightworld import EightWorldFetcher
-from src.fetchers.nhkworld import NHKWorldFetcher
-from src.fetchers.asahi import AsahiFetcher
-from src.fetchers.mainichi import MainichiFetcher
-from src.fetchers.japantimes import JapanTimesFetcher
 from src.fetchers.shinmin import ShinMinFetcher
 from src.fetchers.scmp import SCMPFetcher
 from src.fetchers.initium import InitiumFetcher
@@ -53,7 +48,6 @@ FETCHERS = {
     'aljazeera': AlJazeeraFetcher,
     'techcrunch': TechCrunchFetcher,
     'reddit': RedditFetcher,
-    'zaobao': ZaobaoFetcher,
     'afp': AFPFetcher,
     'washingtonpost': WashingtonPostFetcher,
     'financialtimes': FinancialTimesFetcher,
@@ -62,10 +56,6 @@ FETCHERS = {
     'theverge': TheVergeFetcher,
     'googlenews': GoogleNewsFetcher,
     'eightworld': EightWorldFetcher,
-    'nhkworld': NHKWorldFetcher,
-    'asahi': AsahiFetcher,
-    'mainichi': MainichiFetcher,
-    'japantimes': JapanTimesFetcher,
     'shinmin': ShinMinFetcher,
     'scmp': SCMPFetcher,
     'initium': InitiumFetcher,

@@ -89,23 +89,19 @@ def admin_fetch():
     """抓取管理页面"""
     from fetchers_registry import FETCHERS
     
-    japanese_sources = {'nhkworld', 'asahi', 'mainichi', 'japantimes'}
     chinese_sources = {
-        'zaobao', 'eightworld', 'shinmin', 'scmp', 'initium', 
+        'eightworld', 'shinmin', 'scmp', 'initium', 
         'toutiao', 'baidu', 'weibo', 'ruanyifeng', 'mittechreview', 
         'douyin', '36kr', 'sspai', 'v2ex'
     }
     
     categorized_fetchers = {
         '国际媒体': [],
-        '日本媒体': [],
         '中文媒体': []
     }
     
     for key in FETCHERS.keys():
-        if key in japanese_sources:
-            categorized_fetchers['日本媒体'].append(key)
-        elif key in chinese_sources:
+        if key in chinese_sources:
             categorized_fetchers['中文媒体'].append(key)
         else:
             categorized_fetchers['国际媒体'].append(key)

@@ -7,10 +7,9 @@ from datetime import datetime
 from src.fetchers import (
     ReutersFetcher, APNewsFetcher, BBCFetcher, BloombergFetcher,
     HackerNewsFetcher, GuardianFetcher, NYTimesFetcher, AlJazeeraFetcher,
-    TechCrunchFetcher, ZaobaoFetcher, AFPFetcher, WashingtonPostFetcher,
+    TechCrunchFetcher, AFPFetcher, WashingtonPostFetcher,
     FinancialTimesFetcher, EconomistFetcher, ArsTechnicaFetcher,
-    TheVergeFetcher, GoogleNewsFetcher, EightWorldFetcher, NHKWorldFetcher,
-    AsahiFetcher, MainichiFetcher, JapanTimesFetcher, ShinMinFetcher,
+    TheVergeFetcher, GoogleNewsFetcher, EightWorldFetcher, ShinMinFetcher,
     SCMPFetcher, InitiumFetcher, ToutiaoFetcher, BaiduFetcher, WeiboFetcher,
     RuanyifengFetcher, MITTechReviewFetcher, Kr36Fetcher, SSPaiFetcher, V2EXFetcher
 )
@@ -50,8 +49,6 @@ class NewsJobs:
             WashingtonPostFetcher(),
             FinancialTimesFetcher(),
             GoogleNewsFetcher(),
-            NHKWorldFetcher(),
-            JapanTimesFetcher(),
             SCMPFetcher(),
             Kr36Fetcher(),
             SSPaiFetcher(),
@@ -59,13 +56,10 @@ class NewsJobs:
         
         # 低优先级新闻源（每天）
         self.low_priority_fetchers = [
-            ZaobaoFetcher(),
             EconomistFetcher(),
             ArsTechnicaFetcher(),
             TheVergeFetcher(),
             EightWorldFetcher(),
-            AsahiFetcher(),
-            MainichiFetcher(),
             ShinMinFetcher(),
             InitiumFetcher(),
             RuanyifengFetcher(),
