@@ -4,7 +4,7 @@
 定义新闻数据的结构
 """
 from datetime import datetime
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel, Field
 
@@ -27,7 +27,7 @@ class NewsArticle(BaseModel):
     
     # 分类信息
     category: str = Field(default="综合", description="新闻分类")
-    priority: int = Field(default=5, ge=1, le=10, description="优先级 1-10")
+    priority: int = Field(default=5, ge=1, le=1000, description="优先级 1-100")
     tags: List[str] = Field(default_factory=list, description="标签列表")
     
     # 验证信息

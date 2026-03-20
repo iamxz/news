@@ -257,9 +257,11 @@ class NewsProcessor:
             )
             merged_article.warnings = list(set(merged_article.warnings + article.warnings))
 
-            # 取最高可信度，累计交叉引用
+            # 取最高可信度，最高优先级，累计交叉引用
             if article.credibility_score > merged_article.credibility_score:
                 merged_article.credibility_score = article.credibility_score
+            if article.priority > merged_article.priority:
+                merged_article.priority = article.priority
             merged_article.cross_references += article.cross_references + 1
 
         merged_article.validated = True

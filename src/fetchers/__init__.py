@@ -1,61 +1,30 @@
 """新闻抓取器模块"""
 
-from .reuters import ReutersFetcher
-from .hackernews import HackerNewsFetcher
-from .bloomberg import BloombergFetcher
-from .ap_news import APNewsFetcher
-from .bbc import BBCFetcher
-from .guardian import GuardianFetcher
-from .nytimes import NYTimesFetcher
-from .aljazeera import AlJazeeraFetcher
-from .techcrunch import TechCrunchFetcher
-from .reddit import RedditFetcher
-from .afp import AFPFetcher
-from .washingtonpost import WashingtonPostFetcher
-from .financialtimes import FinancialTimesFetcher
-from .economist import EconomistFetcher
-from .arstechnica import ArsTechnicaFetcher
-from .theverge import TheVergeFetcher
-from .googlenews import GoogleNewsFetcher
-from .eightworld import EightWorldFetcher
-from .shinmin import ShinMinFetcher
-from .scmp import SCMPFetcher
-from .initium import InitiumFetcher
-from .toutiao import ToutiaoFetcher
-from .baidu import BaiduFetcher
-from .weibo import WeiboFetcher
-from .ruanyifeng import RuanyifengFetcher
-from .mittechreview import MITTechReviewFetcher
-from .douyin import DouyinFetcher
-from .v2ex import V2EXFetcher
+import os
+import importlib
+import inspect
 
-__all__ = [
-    'ReutersFetcher',
-    'HackerNewsFetcher',
-    'BloombergFetcher',
-    'APNewsFetcher',
-    'BBCFetcher',
-    'GuardianFetcher',
-    'NYTimesFetcher',
-    'AlJazeeraFetcher',
-    'TechCrunchFetcher',
-    'RedditFetcher',
-    'AFPFetcher',
-    'WashingtonPostFetcher',
-    'FinancialTimesFetcher',
-    'EconomistFetcher',
-    'ArsTechnicaFetcher',
-    'TheVergeFetcher',
-    'GoogleNewsFetcher',
-    'EightWorldFetcher',
-    'ShinMinFetcher',
-    'SCMPFetcher',
-    'InitiumFetcher',
-    'ToutiaoFetcher',
-    'BaiduFetcher',
-    'WeiboFetcher',
-    'RuanyifengFetcher',
-    'MITTechReviewFetcher',
-    'DouyinFetcher',
-    'V2EXFetcher',
-]
+# 动态导入 source 目录下的所有抓取器
+__all__ = []
+
+# 获取 source 目录路径
+current_dir = os.path.dirname(__file__)
+source_dir = os.path.join(current_dir, 'source')
+
+# 遍历 source 目录下的所有文件
+for filename in os.listdir(source_dir):
+    # 只处理 .py 文件
+    if filename.endswith('.py'):
+        # 获取模块名（去掉 .py 后缀）
+        module_name = filename[:-3]
+        # 导入模块
+        module = importlib.import_module(f'.source.{module_name}', package=__name__)
+        
+        # 遍历模块中的所有属性
+        for name, obj in inspect.getmembers(module):
+            # 只添加类，且类名以 Fetcher 结尾，排除 BaseFetcher
+            if inspect.isclass(obj) and name.endswith('Fetcher') and name != 'BaseFetcher':
+                # 将类添加到当前模块的命名空间
+                globals()[name] = obj
+                # 将类名添加到 __all__ 列表
+                __all__.append(name)

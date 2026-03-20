@@ -163,9 +163,11 @@ class BaiduFetcher(BaseFetcher):
                 logger.info(f"通过链接过滤找到 {len(hot_items)} 条")
             
             # 解析找到的热搜项
-            for item in hot_items[:20]:  # 限制前20条
+            for i, item in enumerate(hot_items[:20]):  # 限制前20条
                 article = self._parse_item(item)
                 if article:
+                    # 根据排名设置优先级，排名越高优先级越高
+                    article.priority = 20 - i
                     articles.append(article)
             
             logger.info(f"百度热搜: 抓取到 {len(articles)} 条")

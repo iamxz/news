@@ -226,19 +226,20 @@ class Database:
         clause = "WHERE 1=1"
         params: list = []
 
-        if source:
+        if source and source != '':
             clause += " AND source = ?"
             params.append(source)
-        if category:
+        if category and category != '':
             clause += " AND category = ?"
             params.append(category)
         if min_credibility is not None:
             clause += " AND credibility_score >= ?"
             params.append(min_credibility)
-        if days:
+        if days is not None:
             cutoff = datetime.now() - timedelta(days=days)
+            cutoff_str = cutoff.isoformat()
             clause += " AND published_at >= ?"
-            params.append(cutoff)
+            params.append(cutoff_str)
 
         return clause, params
 
@@ -269,10 +270,13 @@ class Database:
             with self._get_connection() as conn:
                 cursor = conn.cursor()
                 where, params = self._build_filter_clause(source, category, min_credibility, days)
-                query = f"SELECT * FROM articles {where} ORDER BY published_at DESC LIMIT ? OFFSET ?"
+                query = f"SELECT * FROM articles {where} ORDER BY priority DESC, published_at DESC LIMIT ? OFFSET ?"
                 params.extend([limit, offset])
+                logger.info(f"执行查询: {query} 参数: {params}")
                 cursor.execute(query, params)
-                return [self._row_to_article(row) for row in cursor.fetchall()]
+                result = [self._row_to_article(row) for row in cursor.fetchall()]
+                logger.info(f"查询结果数量: {len(result)}")
+                return result
         except Exception as e:
             logger.error(f"获取新闻列表失败: {e}", exc_info=True)
             return []

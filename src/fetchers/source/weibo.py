@@ -21,18 +21,8 @@ class WeiboFetcher(BaseFetcher):
         # 添加微博需要的 headers
         self.session.headers.update({
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-            'accept-language': 'zh-CN,zh;q=0.9',
-            'cache-control': 'max-age=0',
-            'dnt': '1',
-            'priority': 'u=0, i',
             'referer': 'https://passport.weibo.com/',
             'sec-ch-ua': '"Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"macOS"',
-            'sec-fetch-dest': 'document',
-            'sec-fetch-mode': 'navigate',
-            'sec-fetch-site': 'same-site',
-            'sec-fetch-user': '?1',
             'upgrade-insecure-requests': '1'
         })
         # 添加必要的 cookies
@@ -96,9 +86,12 @@ class WeiboFetcher(BaseFetcher):
             
             logger.info(f"找到 {len(hot_list)} 个热搜项")
             
-            for item in hot_list:
+            # 解析热搜列表
+            for i, item in enumerate(hot_list):
                 article = self._parse_item(item)
                 if article:
+                    # 根据索引设置优先级，索引越小优先级越高
+                    article.priority = 20 - i
                     articles.append(article)
             
             # 如果还是没找到，使用备用方案 - 提取所有链接
@@ -108,6 +101,9 @@ class WeiboFetcher(BaseFetcher):
                 logger.info(f"找到 {len(all_links)} 个链接")
                 
                 seen_titles = set()
+                filtered_links = []
+                
+                # 先过滤链接
                 for link in all_links[:100]:
                     text = link.text.strip()
                     href = link.get('href', '')
@@ -120,27 +116,34 @@ class WeiboFetcher(BaseFetcher):
                         ('weibo.com' in href or 's.weibo.com' in href)):
                         
                         seen_titles.add(text)
-                        # 构建完整链接
-                        if not href.startswith('http'):
-                            href = f"https://s.weibo.com{href}"
-                        
-                        # 生成 ID
-                        article_id = self.generate_id(href)
-                        
-                        # 创建新闻对象
-                        article = NewsArticle(
-                            id=article_id,
-                            title=text,
-                            content=f"来源: 微博热搜",
-                            source=self.source_name,
-                            url=href,
-                            published_at=datetime.now(),
-                            category='热搜',
-                            priority=8,
-                            tags=['热搜', '微博'],
-                            credibility_score=0.70
-                        )
-                        articles.append(article)
+                        filtered_links.append((text, href))
+                
+                # 然后根据过滤后的顺序设置优先级
+                for i, (text, href) in enumerate(filtered_links):
+                    # 构建完整链接
+                    if not href.startswith('http'):
+                        href = f"https://s.weibo.com{href}"
+                    
+                    # 生成 ID
+                    article_id = self.generate_id(href)
+                    
+                    # 根据索引设置优先级，索引越小优先级越高
+                    priority = 20 - i
+                    
+                    # 创建新闻对象
+                    article = NewsArticle(
+                        id=article_id,
+                        title=text,
+                        content=f"来源: 微博热搜",
+                        source=self.source_name,
+                        url=href,
+                        published_at=datetime.now(),
+                        category='热搜',
+                        priority=priority,
+                        tags=['热搜', '微博'],
+                        credibility_score=0.70
+                    )
+                    articles.append(article)
             
         except Exception as e:
             logger.error(f"解析微博热搜 HTML 失败: {e}")
@@ -150,16 +153,6 @@ class WeiboFetcher(BaseFetcher):
     def _parse_item(self, item) -> Optional[NewsArticle]:
         """解析单条热搜项"""
         try:
-            # 提取排名
-            rank_elem = item.select_one('td.td-01.ranktop')
-            if not rank_elem:
-                # 尝试其他可能的排名元素
-                rank_elem = item.select_one('td.td-01')
-                if not rank_elem:
-                    return None
-            
-            rank = rank_elem.text.strip()
-            
             # 提取标题和链接
             title_elem = item.select_one('td.td-02 a')
             if not title_elem:
@@ -188,12 +181,12 @@ class WeiboFetcher(BaseFetcher):
             heat = heat_elem.text.strip() if heat_elem else ''
             
             # 构建内容
-            content = f"排名: {rank} | 热度: {heat}"
+            content = f"热度: {heat}"
             
             # 生成 ID
             article_id = self.generate_id(full_link)
             
-            # 创建新闻对象
+            # 创建新闻对象，优先级将在 _parse_html 中设置
             return NewsArticle(
                 id=article_id,
                 title=title,
@@ -202,7 +195,7 @@ class WeiboFetcher(BaseFetcher):
                 url=full_link,
                 published_at=datetime.now(),
                 category='热搜',
-                priority=8,
+                priority=8,  # 默认优先级，将在 _parse_html 中覆盖
                 tags=['热搜', '微博'],
                 credibility_score=0.70
             )

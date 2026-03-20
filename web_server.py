@@ -6,6 +6,7 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 from datetime import datetime, timedelta
 import asyncio
+import urllib.parse
 from src.storage.database import db  # 复用全局单例，避免重复创建连接
 from src.translators import translator_manager
 from src.utils.config import get_settings
@@ -28,11 +29,14 @@ def index():
     source = request.args.get('source', '')
     category = request.args.get('category', '')
     min_credibility = request.args.get('min_credibility', 0.0, type=float)
-    days = request.args.get('days', 1, type=int)
+    days = request.args.get('days', 30, type=int)
+    
+    # Flask 的 request.args.get 已经自动解码了 URL 编码的参数
+    # 不需要手动解码
     
     articles = db.get_articles(
-        source=source or None,
-        category=category or None,
+        source=source,
+        category=category,
         min_credibility=min_credibility,
         days=days,
         limit=PER_PAGE,
@@ -40,8 +44,8 @@ def index():
     )
     
     total = db.count_articles(
-        source=source or None,
-        category=category or None,
+        source=source,
+        category=category,
         min_credibility=min_credibility,
         days=days
     )
@@ -87,7 +91,7 @@ def admin_dashboard():
 @app.route('/admin/fetch')
 def admin_fetch():
     """抓取管理页面"""
-    from fetchers_registry import FETCHERS
+    from src.fetchers.registry import FETCHERS
     
     chinese_sources = {
         'eightworld', 'shinmin', 'scmp', 'initium', 
@@ -235,7 +239,7 @@ def api_admin_fetch():
         if not sources:
             return jsonify({'success': False, 'error': '请选择新闻源'})
         
-        from fetchers_registry import FETCHERS
+        from src.fetchers.registry import FETCHERS
         total_articles = 0
         
         for source in sources:
