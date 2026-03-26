@@ -21,6 +21,7 @@ class NewsArticle(BaseModel):
     content_zh: str = Field(default="", description="中文内容")
     content_en: str = Field(default="", description="英文内容")
     source: str = Field(description="新闻源名称")
+    language: str = Field(default="en", description="原文语言代码")
     url: str = Field(description="新闻链接")
     published_at: datetime = Field(description="发布时间")
     fetched_at: datetime = Field(default_factory=datetime.now, description="抓取时间")
@@ -50,6 +51,7 @@ class NewsArticle(BaseModel):
                 "content": "This is the news content...",
                 "content_zh": "这是新闻内容...",
                 "source": "Reuters",
+                "language": "en",
                 "url": "https://example.com/news/1",
                 "published_at": "2026-02-04T10:00:00",
                 "category": "国际",

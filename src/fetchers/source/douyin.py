@@ -13,7 +13,7 @@ class DouyinFetcher(BaseFetcher):
     """抖音热榜抓取器"""
     
     def __init__(self):
-        super().__init__('抖音热榜', 'https://www.douyin.com', 2.0)
+        super().__init__('抖音热榜', 'https://www.douyin.com', 2.0, 'zh')
         # 使用 RSSHub 提供的抖音热榜
         self.rss_url = 'https://rsshub.app/douyin/hot-search'
     

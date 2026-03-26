@@ -28,7 +28,8 @@ class NYTimesFetcher(BaseFetcher):
         super().__init__(
             source_name="The New York Times",
             base_url="https://www.nytimes.com",
-            default_delay=1.0
+            default_delay=1.0,
+            language="en"
         )
     
     def fetch(self) -> List[Dict]:

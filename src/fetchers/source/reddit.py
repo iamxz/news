@@ -25,7 +25,8 @@ class RedditFetcher(BaseFetcher):
         super().__init__(
             source_name="Reddit",
             base_url="https://www.reddit.com",
-            default_delay=2.0
+            default_delay=1.0,
+            language="en"
         )
     
     def fetch(self) -> List[Dict]:

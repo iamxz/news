@@ -91,11 +91,6 @@
    - 覆盖政治、经济、科技等领域
    - RSS: https://www.economist.com/rss
 
-10. **Al Jazeera（半岛电视台）** - https://www.aljazeera.com/
-    - 中东地区最有影响力的媒体
-    - 提供中东视角的国际新闻
-    - RSS: https://www.aljazeera.com/xml/rss/all.xml
-
 ### 专业科技新闻
 
 11. **Hacker News** - https://news.ycombinator.com/
@@ -133,23 +128,14 @@
     - 覆盖新加坡、中国、亚洲及国际新闻
     - 中立客观，专业性强
 
-18. **8 视界新闻网（8World）** - https://www.8world.com/
-    - 新加坡新传媒（Mediacorp）旗下中文新闻网站
-    - 提供本地、区域和国际新闻
-    - 包含视频新闻内容
-
-19. **新明日报（Shin Min Daily News）** - https://www.zaobao.com.sg/publication/xin-ming-ri-bao
+18. **新明日报（Shin Min Daily News）** - https://www.zaobao.com.sg/publication/xin-ming-ri-bao
     - 新加坡通俗华文报纸
     - 关注社会民生新闻
     - 更贴近本地生活
 
-20. **南华早报（SCMP）** - https://www.scmp.com/
+19. **南华早报（SCMP）** - https://www.scmp.com/
     - 香港英文媒体，亚洲视角
     - 提供中英双语内容
-
-21. **端传媒（Initium Media）** - https://theinitium.com/
-    - 深度华文媒体
-    - 独立调查报道
 
 ### 中国热搜
 
@@ -198,7 +184,6 @@
 - Financial Times
 - Ars Technica
 - 联合早报（新加坡中文）
-- 8 视界新闻网（新加坡中文）
 - The Asahi Shimbun（日本朝日新闻）
 - The Mainichi（日本每日新闻）
 
@@ -314,16 +299,11 @@ src/
 │   ├── bbc.py         # BBC 新闻抓取
 │   ├── guardian.py    # 卫报抓取
 │   ├── nytimes.py     # 纽约时报抓取
-│   ├── aljazeera.py   # 半岛电视台抓取
 │   ├── hackernews.py  # Hacker News 抓取
 │   ├── bloomberg.py   # 彭博社抓取
 │   ├── techcrunch.py  # TechCrunch 抓取
 │   ├── reddit.py      # Reddit 抓取
 │   ├── zaobao.py      # 联合早报抓取（新加坡中文）
-│   ├── eightworld.py  # 8视界抓取（新加坡中文）
-│   ├── nhk.py         # NHK World 抓取（日本）
-│   ├── asahi.py       # 朝日新闻抓取（日本）
-│   ├── japantimes.py  # The Japan Times 抓取（日本）
 │   └── __init__.py    # 抓取器聚合
 ├── validators/         # 新闻验证器
 │   ├── base.py        # 验证器基类

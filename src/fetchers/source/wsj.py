@@ -31,7 +31,8 @@ class WSJFetcher(BaseFetcher):
         super().__init__(
             source_name="Wall Street Journal",
             base_url="https://www.wsj.com",
-            default_delay=1.0
+            default_delay=1.0,
+            language="en"
         )
     
     async def fetch(self) -> List[Dict]:

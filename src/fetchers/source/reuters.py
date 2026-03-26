@@ -28,7 +28,8 @@ class ReutersFetcher(BaseFetcher):
         super().__init__(
             source_name="Reuters",
             base_url="https://www.reuters.com",
-            default_delay=1.0  # Reuters RSS 可以更频繁
+            default_delay=1.0,  # Reuters RSS 可以更频繁
+            language="en"
         )
     
     async def fetch(self) -> List[Dict]:

@@ -16,7 +16,7 @@ class GoogleNewsFetcher(BaseFetcher):
     """Google News 抓取器"""
     
     def __init__(self):
-        super().__init__('Google News', 'https://example.com', 1.0)
+        super().__init__('Google News', 'https://news.google.com', 1.0, 'en')
         self.rss_url = 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en'
     
     async def fetch(self) -> List[NewsArticle]:

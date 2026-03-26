@@ -17,7 +17,7 @@ class WashingtonPostFetcher(BaseFetcher):
     """华盛顿邮报抓取器"""
     
     def __init__(self):
-        super().__init__('Washington Post', 'https://example.com', 1.0)
+        super().__init__('Washington Post', 'https://www.washingtonpost.com', 1.0, 'en')
         self.rss_url = 'https://feeds.washingtonpost.com/rss/world'
     
     async def fetch(self) -> List[NewsArticle]:

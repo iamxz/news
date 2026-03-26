@@ -15,7 +15,7 @@ class RuanyifengFetcher(BaseFetcher):
     """阮一峰的网络日志抓取器"""
     
     def __init__(self):
-        super().__init__('阮一峰的网络日志', 'https://www.ruanyifeng.com/blog/', 2.0)
+        super().__init__('阮一峰的网络日志', 'https://www.ruanyifeng.com/blog/', 2.0, 'zh')
         self.rss_url = 'https://www.ruanyifeng.com/blog/atom.xml'
     
     async def fetch(self) -> List[NewsArticle]:

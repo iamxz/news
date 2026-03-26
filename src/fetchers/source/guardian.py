@@ -28,7 +28,8 @@ class GuardianFetcher(BaseFetcher):
         super().__init__(
             source_name="The Guardian",
             base_url="https://www.theguardian.com",
-            default_delay=1.0
+            default_delay=1.0,
+            language="en"
         )
     
     def fetch(self) -> List[Dict]:

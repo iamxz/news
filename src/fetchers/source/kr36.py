@@ -24,7 +24,8 @@ class Kr36Fetcher(BaseFetcher):
         super().__init__(
             source_name="36氪",
             base_url="https://36kr.com",
-            default_delay=1.0
+            default_delay=1.0,
+            language="zh"
         )
     
     async def fetch(self) -> List[Dict]:
@@ -95,8 +96,10 @@ class Kr36Fetcher(BaseFetcher):
                 
                 article = {
                     'title': entry.get('title', '').strip(),
+                    'title_zh': entry.get('title', '').strip(),
                     'url': entry.get('link', '').strip(),
                     'content': content,
+                    'content_zh': content,
                     'published_at': published_at,
                     'category': self._map_category(category),
                     'priority': 6,

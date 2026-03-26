@@ -29,8 +29,9 @@ class BBCFetcher(BaseFetcher):
     def __init__(self):
         super().__init__(
             source_name="BBC News",
-            base_url="https://www.bbc.com/news",
-            default_delay=1.0
+            base_url="https://www.bbc.com",
+            default_delay=1.0,
+            language="en"
         )
     
     async def fetch(self) -> List[Dict]:

@@ -16,7 +16,7 @@ class ArsTechnicaFetcher(BaseFetcher):
     """Ars Technica 抓取器"""
     
     def __init__(self):
-        super().__init__('Ars Technica', 'https://example.com', 1.0)
+        super().__init__('Ars Technica', 'https://arstechnica.com', 1.0, 'en')
         self.rss_url = 'http://feeds.arstechnica.com/arstechnica/index'
     
     async def fetch(self) -> List[NewsArticle]:

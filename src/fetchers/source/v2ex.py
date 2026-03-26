@@ -14,7 +14,7 @@ class V2EXFetcher(BaseFetcher):
     """V2EX 抓取器"""
     
     def __init__(self):
-        super().__init__('V2EX', 'https://www.v2ex.com', 2.0)
+        super().__init__('V2EX', 'https://www.v2ex.com', 2.0, 'zh')
         # V2EX 热点页面
         self.hot_url = 'https://www.v2ex.com/?tab=hot'
     

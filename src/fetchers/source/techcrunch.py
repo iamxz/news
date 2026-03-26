@@ -24,7 +24,8 @@ class TechCrunchFetcher(BaseFetcher):
         super().__init__(
             source_name="TechCrunch",
             base_url="https://techcrunch.com",
-            default_delay=1.0
+            default_delay=1.0,
+            language="en"
         )
     
     def fetch(self) -> List[Dict]:

@@ -15,7 +15,7 @@ class MITTechReviewFetcher(BaseFetcher):
     """MIT Technology Review 抓取器"""
     
     def __init__(self):
-        super().__init__('MIT Technology Review', 'https://www.technologyreview.com', 2.0)
+        super().__init__('MIT Technology Review', 'https://www.technologyreview.com', 2.0, 'en')
         self.rss_url = 'https://www.technologyreview.com/feed/'
     
     async def fetch(self) -> List[NewsArticle]:

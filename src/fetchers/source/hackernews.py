@@ -20,7 +20,8 @@ class HackerNewsFetcher(BaseFetcher):
         super().__init__(
             source_name="Hacker News",
             base_url="https://news.ycombinator.com",
-            default_delay=0.5  # API 可以更快
+            default_delay=0.5,  # API 可以更快
+            language="en"
         )
     
     async def fetch(self) -> List[Dict]:

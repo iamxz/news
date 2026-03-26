@@ -17,7 +17,7 @@ class EconomistFetcher(BaseFetcher):
     """经济学人抓取器"""
     
     def __init__(self):
-        super().__init__('The Economist', 'https://example.com', 1.0)
+        super().__init__('The Economist', 'https://www.economist.com', 1.0, 'en')
         self.rss_url = 'https://www.economist.com/rss'
     
     async def fetch(self) -> List[NewsArticle]:

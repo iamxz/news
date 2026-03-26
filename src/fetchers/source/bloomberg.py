@@ -29,7 +29,8 @@ class BloombergFetcher(BaseFetcher):
         super().__init__(
             source_name="Bloomberg",
             base_url="https://www.bloomberg.com",
-            default_delay=1.5  # 彭博社 RSS 延迟
+            default_delay=1.5,  # 彭博社 RSS 延迟
+            language="en"
         )
     
     async def fetch(self) -> List[Dict]:

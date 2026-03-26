@@ -16,7 +16,7 @@ class ToutiaoFetcher(BaseFetcher):
     """今日头条热搜抓取器"""
     
     def __init__(self):
-        super().__init__('今日头条', 'https://www.toutiao.com', 2.0)
+        super().__init__('今日头条', 'https://www.toutiao.com', 2.0, 'zh')
         # 今日头条热搜 API
         self.hotsearch_api = 'https://www.toutiao.com/hot-event/hot-board/?origin=toutiao_pc&_signature=_02B4Z6wo00f01IvTdDAAAIDCuEaCcTJOkDCL93CAAEtXNzCQstAKkzGzG9aN2KkmR06pScDy9w69-ttGUk79nqJplkj6qh.7W.x7Vv-cOfAiSrrFDwNh6fsI.QwT3RxreRjsvzoVMvSalNrm7c'
     

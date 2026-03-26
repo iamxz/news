@@ -16,7 +16,7 @@ class BaiduFetcher(BaseFetcher):
     """百度热搜抓取器"""
     
     def __init__(self):
-        super().__init__('百度热搜', 'https://www.baidu.com', 2.0)
+        super().__init__('百度热搜', 'https://www.baidu.com', 2.0, 'zh')
         # 百度热搜页面
         self.hotsearch_url = 'https://top.baidu.com/board?tab=realtime'
     

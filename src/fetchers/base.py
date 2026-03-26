@@ -20,7 +20,7 @@ from src.utils.robots import robots_checker
 class BaseFetcher(ABC):
     """新闻抓取器基类"""
     
-    def __init__(self, source_name: str, base_url: str, default_delay: float = 2.0):
+    def __init__(self, source_name: str, base_url: str, default_delay: float = 2.0, language: str = 'zh'):
         """
         初始化抓取器
         
@@ -28,10 +28,12 @@ class BaseFetcher(ABC):
             source_name: 新闻源名称
             base_url: 基础 URL
             default_delay: 默认请求延迟（秒）
+            language: 媒体语言，默认为中文('zh')
         """
         self.source_name = source_name
         self.base_url = base_url
         self.default_delay = default_delay
+        self.language = language
         self.settings = get_settings()
         self.session = self._create_session()
         
@@ -149,6 +151,7 @@ class BaseFetcher(ABC):
         
         # 确保必需字段存在
         article.setdefault('source', self.source_name)
+        article.setdefault('language', self.language)
         article.setdefault('title', '')
         article.setdefault('title_zh', '')
         article.setdefault('content', '')

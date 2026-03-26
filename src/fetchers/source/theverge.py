@@ -16,7 +16,7 @@ class TheVergeFetcher(BaseFetcher):
     """The Verge 抓取器"""
     
     def __init__(self):
-        super().__init__('The Verge', 'https://example.com', 1.0)
+        super().__init__('The Verge', 'https://www.theverge.com', 1.0, 'en')
         self.rss_url = 'https://www.theverge.com/rss/index.xml'
     
     async def fetch(self) -> List[NewsArticle]:

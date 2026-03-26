@@ -94,7 +94,7 @@ def admin_fetch():
     from src.fetchers.registry import FETCHERS
     
     chinese_sources = {
-        'eightworld', 'scmp', 'initium', 
+        'scmp', 'initium', 
         'toutiao', 'baidu', 'weibo', 'ruanyifeng', 'mittechreview', 
         'douyin', '36kr', 'sspai', 'v2ex'
     }

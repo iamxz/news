@@ -17,7 +17,7 @@ class AFPFetcher(BaseFetcher):
     """法新社新闻抓取器"""
     
     def __init__(self):
-        super().__init__('AFP', 'https://example.com', 1.0)
+        super().__init__('AFP', 'https://www.afp.com', 1.0, 'en')
         self.rss_url = 'https://www.afp.com/en/rss'
     
     async def fetch(self) -> List[NewsArticle]:

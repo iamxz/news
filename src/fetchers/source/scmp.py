@@ -16,7 +16,7 @@ class SCMPFetcher(BaseFetcher):
     """南华早报抓取器"""
     
     def __init__(self):
-        super().__init__('SCMP', 'https://example.com', 1.0)
+        super().__init__('SCMP', 'https://www.scmp.com', 1.0, 'en')
         self.rss_url = 'https://www.scmp.com/rss/91/feed'
     
     async def fetch(self) -> List[NewsArticle]:

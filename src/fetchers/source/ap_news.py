@@ -33,7 +33,8 @@ class APNewsFetcher(BaseFetcher):
         super().__init__(
             source_name="Associated Press",
             base_url="https://apnews.com",
-            default_delay=2.0  # HTML 抓取需要更礼貌
+            default_delay=2.0,  # HTML 抓取需要更礼貌
+            language="en"
         )
     
     async def fetch(self) -> List[Dict]:

@@ -24,7 +24,8 @@ class SSPaiFetcher(BaseFetcher):
         super().__init__(
             source_name="少数派",
             base_url="https://sspai.com",
-            default_delay=1.0
+            default_delay=1.0,
+            language="zh"
         )
     
     async def fetch(self) -> List[Dict]:

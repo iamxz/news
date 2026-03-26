@@ -15,7 +15,7 @@ class WeiboFetcher(BaseFetcher):
     """微博热搜抓取器"""
     
     def __init__(self):
-        super().__init__('微博热搜', 'https://weibo.com', 2.0)
+        super().__init__('微博热搜', 'https://weibo.com', 2.0, 'zh')
         # 微博热搜地址
         self.hot_url = 'https://s.weibo.com/top/summary?cate=realtimehot'
         # 添加微博需要的 headers
