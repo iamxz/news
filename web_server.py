@@ -3,10 +3,9 @@
 
 提供精美的新闻列表展示和管理后台
 """
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify
 from datetime import datetime, timedelta
 import asyncio
-import urllib.parse
 from src.storage.database import db  # 复用全局单例，避免重复创建连接
 from src.translators import translator_manager
 from src.utils.config import get_settings
@@ -93,21 +92,24 @@ def admin_fetch():
     """抓取管理页面"""
     from src.fetchers.registry import FETCHERS
     
-    chinese_sources = {
-        'scmp', 'initium', 
-        'toutiao', 'baidu', 'weibo', 'ruanyifeng', 'mittechreview', 
-        'douyin', '36kr', 'sspai', 'v2ex'
-    }
-    
     categorized_fetchers = {
         '国际媒体': [],
         '中文媒体': []
     }
     
-    for key in FETCHERS.keys():
-        if key in chinese_sources:
-            categorized_fetchers['中文媒体'].append(key)
-        else:
+    for key, fetcher_class in FETCHERS.items():
+        try:
+            # 创建抓取器实例
+            fetcher = fetcher_class()
+            # 获取语言字段
+            language = getattr(fetcher, 'language', 'en')
+            # 根据语言分类
+            if language == 'zh':
+                categorized_fetchers['中文媒体'].append(key)
+            else:
+                categorized_fetchers['国际媒体'].append(key)
+        except Exception as e:
+            # 如果创建实例失败，默认归类为国际媒体
             categorized_fetchers['国际媒体'].append(key)
             
     return render_template('admin/fetch.html', categorized_fetchers=categorized_fetchers, total_count=len(FETCHERS))
@@ -277,6 +279,7 @@ def api_admin_fetch():
                             content_zh=article_dict.get('content_zh', ''),
                             content_en=article_dict.get('content_en', ''),
                             source=article_dict.get('source'),
+                            language=article_dict.get('language', getattr(fetcher, 'language', 'en')),
                             url=article_dict.get('url'),
                             published_at=article_dict.get('published_at'),
                             fetched_at=article_dict.get('fetched_at', datetime.now()),

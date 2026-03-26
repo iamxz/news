@@ -49,6 +49,7 @@ class NewsJobs:
                             content_zh=article_dict.get('content_zh', ''),
                             content_en=article_dict.get('content_en', ''),
                             source=article_dict.get('source'),
+                            language=article_dict.get('language', getattr(fetcher, 'language', 'en')),
                             url=article_dict.get('url'),
                             published_at=article_dict.get('published_at'),
                             fetched_at=article_dict.get('fetched_at', datetime.now()),
@@ -153,9 +154,9 @@ class NewsJobs:
         
         # 按中文优先排序
         def sort_key(fetcher):
-            # 检查 source_name 是否包含中文字符或是否为 V2EX
-            has_chinese = any('\u4e00' <= char <= '\u9fff' for char in fetcher.source_name)
-            if has_chinese:
+            # 使用抓取器的 language 字段来判断
+            language = getattr(fetcher, 'language', 'en')
+            if language == 'zh':
                 return (0, fetcher.source_name)
             else:
                 return (1, fetcher.source_name)
