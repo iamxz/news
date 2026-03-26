@@ -130,7 +130,7 @@ class ToutiaoFetcher(BaseFetcher):
                             articles.append(article)
                     
                     logger.info(f"今日头条: 抓取到 {len(articles)} 条热搜")
-                    return articles[:20]  # 限制前20条
+                    return articles  
                 else:
                     logger.error("API 响应数据结构不正确，未找到热搜数据")
                     return []

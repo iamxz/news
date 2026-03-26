@@ -45,8 +45,7 @@ class V2EXFetcher(BaseFetcher):
                 if article:
                     articles.append(article)
             
-            # 限制返回数量
-            return articles[:20]
+            return articles
             
         except Exception as e:
             logger.error(f"解析 V2EX 页面失败: {e}")

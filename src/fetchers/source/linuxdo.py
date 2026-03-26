@@ -28,7 +28,7 @@ class LinuxDoFetcher(BaseFetcher):
             feed = feedparser.parse(self.rss_url)
             articles = []
             
-            for entry in feed.entries[:20]:  # 限制获取前 20 条
+            for entry in feed.entries: 
                 article = self._parse_entry(entry)
                 if article:
                     articles.append(article)

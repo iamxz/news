@@ -27,7 +27,7 @@ class SCMPFetcher(BaseFetcher):
             feed = feedparser.parse(self.rss_url)
             articles = []
             
-            for entry in feed.entries[:20]:
+            for entry in feed.entries:
                 try:
                     article = self._parse_entry(entry)
                     if article:
