@@ -167,7 +167,8 @@ class BaiduFetcher(BaseFetcher):
                 article = self._parse_item(item)
                 if article:
                     # 根据排名设置优先级，排名越高优先级越高
-                    article.priority = 20 - i
+                    article.priority = 100 - i  # 使用 100 作为基础，确保优先级为正数
+                    logger.info(f"百度热搜第 {i+1} 条: {article.title[:20]}... 优先级: {article.priority}")
                     articles.append(article)
             
             logger.info(f"百度热搜: 抓取到 {len(articles)} 条")

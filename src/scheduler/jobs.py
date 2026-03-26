@@ -60,7 +60,6 @@ class NewsJobs:
             ArsTechnicaFetcher(),
             TheVergeFetcher(),
             EightWorldFetcher(),
-            ShinMinFetcher(),
             InitiumFetcher(),
             RuanyifengFetcher(),
             MITTechReviewFetcher(),

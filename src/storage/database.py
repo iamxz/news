@@ -364,6 +364,27 @@ class Database:
             logger.error(f"删除旧新闻失败: {e}", exc_info=True)
             return 0
     
+    def delete_all_articles(self) -> int:
+        """
+        删除所有新闻
+        
+        Returns:
+            删除的数量
+        """
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("DELETE FROM articles")
+                deleted = cursor.rowcount
+                conn.commit()
+                
+                logger.info(f"删除所有新闻: {deleted} 条")
+                return deleted
+                
+        except Exception as e:
+            logger.error(f"删除所有新闻失败: {e}", exc_info=True)
+            return 0
+    
     def get_statistics(self) -> Dict:
         """
         获取数据库统计信息

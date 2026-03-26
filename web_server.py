@@ -94,7 +94,7 @@ def admin_fetch():
     from src.fetchers.registry import FETCHERS
     
     chinese_sources = {
-        'eightworld', 'shinmin', 'scmp', 'initium', 
+        'eightworld', 'scmp', 'initium', 
         'toutiao', 'baidu', 'weibo', 'ruanyifeng', 'mittechreview', 
         'douyin', '36kr', 'sspai', 'v2ex'
     }
@@ -384,17 +384,23 @@ def api_admin_validate_all():
 
 @app.route('/api/admin/clean', methods=['POST'])
 def api_admin_clean():
-    """清理旧新闻"""
+    """清理新闻"""
     try:
         data = request.get_json()
-        days = data.get('days', 30)
+        clean_all = data.get('clean_all', False)
         
-        deleted = db.delete_old_articles(days=days)
+        if clean_all:
+            deleted = db.delete_all_articles()
+            message = f'成功清理所有 {deleted} 条新闻'
+        else:
+            days = data.get('days', 30)
+            deleted = db.delete_old_articles(days=days)
+            message = f'成功清理 {deleted} 条旧新闻'
         
         return jsonify({
             'success': True,
             'deleted': deleted,
-            'message': f'成功清理 {deleted} 条旧新闻'
+            'message': message
         })
         
     except Exception as e:
@@ -484,6 +490,11 @@ def credibility_color(score):
 
 
 if __name__ == '__main__':
-    logger.info("启动新闻 Web 应用...")
-    app.run(host='0.0.0.0', port=4000, debug=True)
+    import argparse
+    parser = argparse.ArgumentParser(description='新闻 Web 应用')
+    parser.add_argument('--port', type=int, default=4000, help='服务器端口')
+    args = parser.parse_args()
+    
+    logger.info(f"启动新闻 Web 应用... 端口: {args.port}")
+    app.run(host='0.0.0.0', port=args.port, debug=True)
 

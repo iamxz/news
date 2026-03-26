@@ -87,11 +87,12 @@ class WeiboFetcher(BaseFetcher):
             logger.info(f"找到 {len(hot_list)} 个热搜项")
             
             # 解析热搜列表
-            for i, item in enumerate(hot_list):
+            for i, item in enumerate(hot_list[:50]):  # 限制前50条
                 article = self._parse_item(item)
                 if article:
                     # 根据索引设置优先级，索引越小优先级越高
-                    article.priority = 20 - i
+                    article.priority = 100 - i  # 使用 100 作为基础，确保优先级为正数
+                    logger.info(f"微博热搜第 {i+1} 条: {article.title[:20]}... 优先级: {article.priority}")
                     articles.append(article)
             
             # 如果还是没找到，使用备用方案 - 提取所有链接
@@ -119,7 +120,7 @@ class WeiboFetcher(BaseFetcher):
                         filtered_links.append((text, href))
                 
                 # 然后根据过滤后的顺序设置优先级
-                for i, (text, href) in enumerate(filtered_links):
+                for i, (text, href) in enumerate(filtered_links[:50]):  # 限制前50条
                     # 构建完整链接
                     if not href.startswith('http'):
                         href = f"https://s.weibo.com{href}"
@@ -128,7 +129,7 @@ class WeiboFetcher(BaseFetcher):
                     article_id = self.generate_id(href)
                     
                     # 根据索引设置优先级，索引越小优先级越高
-                    priority = 20 - i
+                    priority = 100 - i  # 使用 100 作为基础，确保优先级为正数
                     
                     # 创建新闻对象
                     article = NewsArticle(
@@ -143,6 +144,7 @@ class WeiboFetcher(BaseFetcher):
                         tags=['热搜', '微博'],
                         credibility_score=0.70
                     )
+                    logger.info(f"微博热搜(备用)第 {i+1} 条: {text[:20]}... 优先级: {priority}")
                     articles.append(article)
             
         except Exception as e:
