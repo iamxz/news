@@ -41,19 +41,16 @@
 这些通讯社以客观、中立、及时著称，是全球新闻的主要来源：
 
 1. **Reuters（路透社）** - https://www.reuters.com/
-
    - 全球最大的国际多媒体新闻通讯社
    - 严格遵守新闻独立性和客观性原则
    - RSS: https://www.reuters.com/tools/rss
 
 2. **Associated Press（美联社）** - https://apnews.com/
-
    - 美国最大的通讯社，全球最可信的新闻来源之一
    - 无党派偏见，以事实报道为核心
    - RSS: https://apnews.com/rss
 
 3. **AFP（法新社）** - https://www.afp.com/
-
    - 世界三大通讯社之一
    - 多语言新闻服务
    - 注重国际视角
@@ -66,36 +63,30 @@
 ### 主流权威媒体
 
 4. **BBC News（英国广播公司）** - https://www.bbc.com/news
-
    - 英国公共广播机构，全球信誉度最高的媒体之一
    - 相对中立和客观
    - RSS: http://feeds.bbci.co.uk/news/rss.xml
 
 5. **The Guardian（卫报）** - https://www.theguardian.com/
-
    - 英国主流媒体，以深度报道著称
    - 偏自由派但保持新闻专业性
    - RSS: https://www.theguardian.com/world/rss
 
 6. **The New York Times（纽约时报）** - https://www.nytimes.com/
-
    - 美国最具影响力的报纸
    - 深度调查报道
    - RSS: https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml
 
 7. **The Washington Post（华盛顿邮报）** - https://www.washingtonpost.com/
-
    - 美国主流媒体，以政治报道著称
    - 曾揭露水门事件
 
 8. **Financial Times（金融时报）** - https://www.ft.com/
-
    - 全球最权威的财经新闻媒体
    - 侧重商业和经济新闻
    - 国际视角强
 
 9. **The Economist（经济学人）** - https://www.economist.com/
-
    - 英国新闻周刊，以分析深度著称
    - 覆盖政治、经济、科技等领域
    - RSS: https://www.economist.com/rss
@@ -108,18 +99,15 @@
 ### 专业科技新闻
 
 11. **Hacker News** - https://news.ycombinator.com/
-
     - 科技圈最受欢迎的新闻聚合平台
     - 由 Y Combinator 运营
     - API: https://github.com/HackerNews/API
 
 12. **TechCrunch** - https://techcrunch.com/
-
     - 科技创业新闻领导者
     - RSS: https://techcrunch.com/feed/
 
 13. **Ars Technica** - https://arstechnica.com/
-
     - 深度科技新闻和分析
     - RSS: http://feeds.arstechnica.com/arstechnica/index
 
@@ -130,7 +118,6 @@
 ### 社交新闻聚合
 
 15. **Reddit World News** - https://www.reddit.com/r/worldnews/
-
     - 用户驱动的全球新闻讨论
     - API: https://www.reddit.com/dev/api/
 
@@ -141,26 +128,22 @@
 ### 中文媒体（可选）
 
 17. **联合早报（Lianhe Zaobao）** - https://www.zaobao.com.sg/
-
     - 新加坡最权威的华文日报
     - SPH Media（新加坡报业控股）旗下
     - 覆盖新加坡、中国、亚洲及国际新闻
     - 中立客观，专业性强
 
 18. **8 视界新闻网（8World）** - https://www.8world.com/
-
     - 新加坡新传媒（Mediacorp）旗下中文新闻网站
     - 提供本地、区域和国际新闻
     - 包含视频新闻内容
 
 19. **新明日报（Shin Min Daily News）** - https://www.zaobao.com.sg/publication/xin-ming-ri-bao
-
     - 新加坡通俗华文报纸
     - 关注社会民生新闻
     - 更贴近本地生活
 
 20. **南华早报（SCMP）** - https://www.scmp.com/
-
     - 香港英文媒体，亚洲视角
     - 提供中英双语内容
 
@@ -168,53 +151,17 @@
     - 深度华文媒体
     - 独立调查报道
 
-### 日本媒体
-
-22. **NHK World** - https://www3.nhk.or.jp/nhkworld/en/news/
-
-    - 日本公共广播公司国际频道
-    - 提供英文、中文等多语言新闻
-    - 日本最权威的新闻机构
-    - 中文版：https://www3.nhk.or.jp/nhkworld/zh/news/
-
-23. **The Asahi Shimbun（朝日新闻）** - https://www.asahi.com/ajw/
-
-    - 日本三大报之一，发行量全国第二
-    - 英文版提供日本和国际新闻
-    - 以进步立场和调查报道著称
-
-24. **The Japan News（读卖新闻）** - https://japannews.yomiuri.co.jp/
-
-    - 读卖新闻集团英文版
-    - 读卖新闻是全球发行量最大的报纸
-    - 偏保守立场
-
-25. **The Mainichi（每日新闻）** - https://mainichi.jp/english/
-
-    - 日本三大报之一
-    - 英文版提供日本国内和国际新闻
-    - 较为中立客观
-
-26. **The Japan Times** - https://www.japantimes.co.jp/
-    - 日本历史最悠久的英文报纸
-    - 独立媒体，非日本大报旗下
-    - 深度分析日本社会和政治
-    - RSS: https://www.japantimes.co.jp/feed/
-
 ### 中国热搜
 
 27. **今日头条热搜** - https://www.toutiao.com
-
     - 字节跳动旗下新闻聚合平台
     - 实时热点新闻和话题
 
 28. **百度热搜** - https://www.baidu.com
-
     - 百度搜索热榜
     - 反映中国网民关注热点
 
 29. **微博热搜** - https://weibo.com
-
     - 中国最大社交媒体平台
     - 实时热门话题和事件
 
@@ -426,21 +373,18 @@ pyproject.toml         # 项目配置
 ### 核心架构模式
 
 1. **抓取器模式（Fetcher Pattern）**
-
    - 每个新闻源实现独立的抓取器类
    - 继承自 `BaseFetcher` 基类
    - 统一的接口：`fetch()`, `parse()`, `validate()`
    - 支持错误重试和限流
 
 2. **翻译服务层**
-
    - 支持多个翻译 API（OpenAI、DeepL 等）
    - 自动选择可用的翻译服务
    - 翻译结果缓存以节省 API 调用
    - 批量翻译优化
 
 3. **命令行渲染**
-
    - 使用 chalk 进行颜色输出
    - 使用 cli-table3 进行表格展示
    - 支持分页和交互式浏览
@@ -510,13 +454,11 @@ pyproject.toml         # 项目配置
 基于以下维度评估新闻可信度（0.0-1.0）：
 
 - **来源可信度**：基于新闻源的历史信誉
-
   - 通讯社（Reuters、AP）：0.95-1.0
   - 主流媒体（BBC、NYT）：0.85-0.95
   - 社交聚合（Reddit、HN）：0.60-0.80
 
 - **内容完整性**：
-
   - 是否包含明确的消息来源
   - 是否有作者署名
   - 是否包含时间、地点等基本要素

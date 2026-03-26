@@ -1,146 +1,207 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>抓取管理 - 管理后台</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100">
+  </head>
+  <body class="bg-gray-100">
     <!-- 导航栏 -->
     <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center space-x-8">
-                    <a href="/admin" class="text-xl font-bold text-gray-900">📊 管理后台</a>
-                    <a href="/admin" class="text-gray-700 hover:text-blue-600">仪表板</a>
-                    <a href="/admin/fetch" class="text-blue-600 font-semibold">抓取管理</a>
-                    <a href="/admin/translate" class="text-gray-700 hover:text-blue-600">翻译管理</a>
-                    <a href="/admin/validate" class="text-gray-700 hover:text-blue-600">验证管理</a>
-                    <a href="/admin/scheduler" class="text-gray-700 hover:text-blue-600">定时任务</a>
-                    <a href="/admin/settings" class="text-gray-700 hover:text-blue-600">系统设置</a>
-                </div>
-                <a href="/" class="text-blue-600 hover:text-blue-800">← 返回前台</a>
-            </div>
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center space-x-8">
+            <a href="/admin" class="text-xl font-bold text-gray-900"
+              >📊 管理后台</a
+            >
+            <a href="/admin" class="text-gray-700 hover:text-blue-600"
+              >仪表板</a
+            >
+            <a href="/admin/fetch" class="text-blue-600 font-semibold"
+              >抓取管理</a
+            >
+            <a href="/admin/translate" class="text-gray-700 hover:text-blue-600"
+              >翻译管理</a
+            >
+            <a href="/admin/validate" class="text-gray-700 hover:text-blue-600"
+              >验证管理</a
+            >
+            <a href="/admin/scheduler" class="text-gray-700 hover:text-blue-600"
+              >定时任务</a
+            >
+            <a href="/admin/settings" class="text-gray-700 hover:text-blue-600"
+              >系统设置</a
+            >
+          </div>
+          <a href="/" class="text-blue-600 hover:text-blue-800">← 返回前台</a>
         </div>
+      </div>
     </nav>
 
     <!-- 主内容区 -->
     <div class="max-w-7xl mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-8">抓取管理</h1>
+      <h1 class="text-3xl font-bold text-gray-900 mb-8">抓取管理</h1>
 
-        <!-- 操作按钮 -->
-        <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <div class="flex flex-wrap gap-4 mb-4">
-                <button onclick="selectAllInActiveTab()" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">全选当前分类</button>
-                <button onclick="selectAll()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">全选所有</button>
-                <button onclick="selectNone()" class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500">取消全选</button>
-                <button onclick="fetchSelected()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">抓取选中的新闻源</button>
-            </div>
-            <div id="status" class="text-sm text-gray-600"></div>
+      <!-- 操作按钮 -->
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex flex-wrap gap-4 mb-4">
+          <button
+            onclick="selectAllInActiveTab()"
+            class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+          >
+            全选当前分类
+          </button>
+          <button
+            onclick="selectAll()"
+            class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+          >
+            全选所有
+          </button>
+          <button
+            onclick="selectNone()"
+            class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+          >
+            取消全选
+          </button>
+          <button
+            onclick="fetchSelected()"
+            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            抓取选中的新闻源
+          </button>
+        </div>
+        <div id="status" class="text-sm text-gray-600"></div>
+      </div>
+
+      <!-- 新闻源列表 -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">
+          选择新闻源（共 {{ total_count }} 个）
+        </h2>
+
+        <!-- Tabs -->
+        <div class="border-b border-gray-200 mb-4">
+          <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+            <button
+              onclick="switchTab('国际媒体')"
+              id="tab-国际媒体"
+              class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-blue-500 text-blue-600"
+            >
+              国际媒体
+            </button>
+
+            <button
+              onclick="switchTab('中文媒体')"
+              id="tab-中文媒体"
+              class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            >
+              中文媒体
+            </button>
+          </nav>
         </div>
 
-        <!-- 新闻源列表 -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">选择新闻源（共 {{ total_count }} 个）</h2>
-            
-            <!-- Tabs -->
-            <div class="border-b border-gray-200 mb-4">
-                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                    <button onclick="switchTab('国际媒体')" id="tab-国际媒体" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-blue-500 text-blue-600">
-                        国际媒体
-                    </button>
-                    <button onclick="switchTab('日本媒体')" id="tab-日本媒体" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                        日本媒体
-                    </button>
-                    <button onclick="switchTab('中文媒体')" id="tab-中文媒体" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                        中文媒体
-                    </button>
-                </nav>
+        <!-- Tab Contents -->
+        <div>
+          {% for category, fetchers in categorized_fetchers.items() %}
+          <div
+            id="content-{{ category }}"
+            class="tab-content {{ 'hidden' if category != '国际媒体' else '' }}"
+          >
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {% for fetcher in fetchers %}
+              <label
+                class="flex items-center space-x-2 p-3 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  name="source"
+                  value="{{ fetcher }}"
+                  class="w-4 h-4"
+                />
+                <span class="text-sm">{{ fetcher }}</span>
+              </label>
+              {% endfor %}
             </div>
-
-            <!-- Tab Contents -->
-            <div>
-                {% for category, fetchers in categorized_fetchers.items() %}
-                <div id="content-{{ category }}" class="tab-content {{ 'hidden' if category != '国际媒体' else '' }}">
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {% for fetcher in fetchers %}
-                        <label class="flex items-center space-x-2 p-3 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer">
-                            <input type="checkbox" name="source" value="{{ fetcher }}" class="w-4 h-4">
-                            <span class="text-sm">{{ fetcher }}</span>
-                        </label>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+          </div>
+          {% endfor %}
         </div>
+      </div>
     </div>
 
     <script>
-        function switchTab(tabId) {
-            // 隐藏所有内容
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            // 重置所有 tab 样式
-            document.querySelectorAll('.tab-btn').forEach(el => {
-                el.classList.remove('border-blue-500', 'text-blue-600');
-                el.classList.add('border-transparent', 'text-gray-500');
-            });
-            
-            // 显示对应内容
-            document.getElementById('content-' + tabId).classList.remove('hidden');
-            // 高亮当前 tab
-            const activeTab = document.getElementById('tab-' + tabId);
-            activeTab.classList.remove('border-transparent', 'text-gray-500');
-            activeTab.classList.add('border-blue-500', 'text-blue-600');
+      function switchTab(tabId) {
+        // 隐藏所有内容
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((el) => el.classList.add("hidden"));
+        // 重置所有 tab 样式
+        document.querySelectorAll(".tab-btn").forEach((el) => {
+          el.classList.remove("border-blue-500", "text-blue-600");
+          el.classList.add("border-transparent", "text-gray-500");
+        });
+
+        // 显示对应内容
+        document.getElementById("content-" + tabId).classList.remove("hidden");
+        // 高亮当前 tab
+        const activeTab = document.getElementById("tab-" + tabId);
+        activeTab.classList.remove("border-transparent", "text-gray-500");
+        activeTab.classList.add("border-blue-500", "text-blue-600");
+      }
+
+      function selectAllInActiveTab() {
+        document
+          .querySelectorAll('.tab-content:not(.hidden) input[name="source"]')
+          .forEach((cb) => (cb.checked = true));
+      }
+
+      function selectAll() {
+        document
+          .querySelectorAll('input[name="source"]')
+          .forEach((cb) => (cb.checked = true));
+      }
+
+      function selectNone() {
+        document
+          .querySelectorAll('input[name="source"]')
+          .forEach((cb) => (cb.checked = false));
+      }
+
+      async function fetchSelected() {
+        const selected = Array.from(
+          document.querySelectorAll('input[name="source"]:checked'),
+        ).map((cb) => cb.value);
+
+        if (selected.length === 0) {
+          alert("请至少选择一个新闻源");
+          return;
         }
 
-        function selectAllInActiveTab() {
-            document.querySelectorAll('.tab-content:not(.hidden) input[name="source"]').forEach(cb => cb.checked = true);
+        const status = document.getElementById("status");
+        status.textContent = `正在抓取 ${selected.length} 个新闻源...`;
+        status.className = "text-sm text-blue-600";
+
+        try {
+          const response = await fetch("/api/admin/fetch", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sources: selected }),
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            status.textContent = data.message;
+            status.className = "text-sm text-green-600";
+          } else {
+            status.textContent = "抓取失败: " + data.error;
+            status.className = "text-sm text-red-600";
+          }
+        } catch (error) {
+          status.textContent = "抓取失败: " + error.message;
+          status.className = "text-sm text-red-600";
         }
-
-        function selectAll() {
-            document.querySelectorAll('input[name="source"]').forEach(cb => cb.checked = true);
-        }
-
-        function selectNone() {
-            document.querySelectorAll('input[name="source"]').forEach(cb => cb.checked = false);
-        }
-
-        async function fetchSelected() {
-            const selected = Array.from(document.querySelectorAll('input[name="source"]:checked'))
-                .map(cb => cb.value);
-
-            if (selected.length === 0) {
-                alert('请至少选择一个新闻源');
-                return;
-            }
-
-            const status = document.getElementById('status');
-            status.textContent = `正在抓取 ${selected.length} 个新闻源...`;
-            status.className = 'text-sm text-blue-600';
-
-            try {
-                const response = await fetch('/api/admin/fetch', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sources: selected })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    status.textContent = data.message;
-                    status.className = 'text-sm text-green-600';
-                } else {
-                    status.textContent = '抓取失败: ' + data.error;
-                    status.className = 'text-sm text-red-600';
-                }
-            } catch (error) {
-                status.textContent = '抓取失败: ' + error.message;
-                status.className = 'text-sm text-red-600';
-            }
-        }
+      }
     </script>
-</body>
+  </body>
 </html>

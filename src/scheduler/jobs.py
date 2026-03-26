@@ -4,15 +4,8 @@
 定义所有定时任务
 """
 from datetime import datetime
-from src.fetchers import (
-    ReutersFetcher, APNewsFetcher, BBCFetcher, BloombergFetcher,
-    HackerNewsFetcher, GuardianFetcher, NYTimesFetcher, AlJazeeraFetcher,
-    TechCrunchFetcher, AFPFetcher, WashingtonPostFetcher,
-    FinancialTimesFetcher, EconomistFetcher, ArsTechnicaFetcher,
-    TheVergeFetcher, GoogleNewsFetcher, EightWorldFetcher, ShinMinFetcher,
-    SCMPFetcher, InitiumFetcher, ToutiaoFetcher, BaiduFetcher, WeiboFetcher,
-    RuanyifengFetcher, MITTechReviewFetcher, Kr36Fetcher, SSPaiFetcher, V2EXFetcher
-)
+from src.fetchers.registry import FETCHERS
+
 from src.translators import translator_manager
 from src.validators import ValidationPipeline
 from src.storage.database import Database
@@ -27,73 +20,10 @@ class NewsJobs:
         self.translator = translator_manager.get_translator()
         self.validator = ValidationPipeline()
         
-        # 高优先级新闻源（每小时）
-        self.high_priority_fetchers = [
-            ReutersFetcher(),
-            APNewsFetcher(),
-            BBCFetcher(),
-            BloombergFetcher(),
-            HackerNewsFetcher(),
-            AFPFetcher(),
-            ToutiaoFetcher(),
-            BaiduFetcher(),
-            WeiboFetcher(),
-        ]
-        
-        # 中优先级新闻源（每6小时）
-        self.medium_priority_fetchers = [
-            GuardianFetcher(),
-            NYTimesFetcher(),
-            AlJazeeraFetcher(),
-            TechCrunchFetcher(),
-            WashingtonPostFetcher(),
-            FinancialTimesFetcher(),
-            GoogleNewsFetcher(),
-            SCMPFetcher(),
-            Kr36Fetcher(),
-            SSPaiFetcher(),
-        ]
-        
-        # 低优先级新闻源（每天）
-        self.low_priority_fetchers = [
-            EconomistFetcher(),
-            ArsTechnicaFetcher(),
-            TheVergeFetcher(),
-            EightWorldFetcher(),
-            InitiumFetcher(),
-            RuanyifengFetcher(),
-            MITTechReviewFetcher(),
-        ]
+        # 动态获取所有抓取器并按中文优先排序
+        self.all_fetchers = self._get_all_fetchers_sorted()
     
-    async def fetch_high_priority_news(self):
-        """抓取高优先级新闻（每小时）"""
-        logger.info("=" * 60)
-        logger.info("开始抓取高优先级新闻")
-        logger.info("=" * 60)
-        
-        await self._fetch_from_sources(self.high_priority_fetchers)
-        
-        logger.info("高优先级新闻抓取完成")
-    
-    async def fetch_medium_priority_news(self):
-        """抓取中优先级新闻（每6小时）"""
-        logger.info("=" * 60)
-        logger.info("开始抓取中优先级新闻")
-        logger.info("=" * 60)
-        
-        await self._fetch_from_sources(self.medium_priority_fetchers)
-        
-        logger.info("中优先级新闻抓取完成")
-    
-    async def fetch_low_priority_news(self):
-        """抓取低优先级新闻（每天）"""
-        logger.info("=" * 60)
-        logger.info("开始抓取低优先级新闻")
-        logger.info("=" * 60)
-        
-        await self._fetch_from_sources(self.low_priority_fetchers)
-        
-        logger.info("低优先级新闻抓取完成")
+
     
     async def _fetch_from_sources(self, fetchers):
         """从指定新闻源抓取"""
@@ -215,6 +145,34 @@ class NewsJobs:
                 logger.error(f"验证失败 [{article.id}]: {e}")
         
         logger.info(f"验证完成，共 {validated_count} 篇")
+    
+    def _get_all_fetchers_sorted(self):
+        """动态获取所有抓取器并按中文优先排序"""
+        # 实例化所有抓取器
+        fetchers = [fetcher_class() for fetcher_class in FETCHERS.values()]
+        
+        # 按中文优先排序
+        def sort_key(fetcher):
+            # 检查 source_name 是否包含中文字符或是否为 V2EX
+            has_chinese = any('\u4e00' <= char <= '\u9fff' for char in fetcher.source_name)
+            if has_chinese:
+                return (0, fetcher.source_name)
+            else:
+                return (1, fetcher.source_name)
+        
+        # 排序
+        fetchers.sort(key=sort_key)
+        return fetchers
+    
+    async def fetch_all_news(self):
+        """抓取所有新闻源"""
+        logger.info("=" * 60)
+        logger.info("开始抓取所有新闻源")
+        logger.info("=" * 60)
+        
+        await self._fetch_from_sources(self.all_fetchers)
+        
+        logger.info("所有新闻源抓取完成")
     
     async def clean_old_news(self):
         """清理旧新闻（30天前）"""

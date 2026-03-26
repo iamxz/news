@@ -22,33 +22,13 @@ class NewsScheduler:
     def _setup_jobs(self):
         """设置定时任务"""
         
-        # 高优先级新闻：每小时抓取
+        # 所有新闻：每小时抓取
         self.scheduler.add_job(
             self._run_async_job,
-            args=[self.jobs.fetch_high_priority_news],
+            args=[self.jobs.fetch_all_news],
             trigger=IntervalTrigger(hours=1),
-            id='fetch_high_priority',
-            name='抓取高优先级新闻',
-            replace_existing=True
-        )
-        
-        # 中优先级新闻：每6小时抓取
-        self.scheduler.add_job(
-            self._run_async_job,
-            args=[self.jobs.fetch_medium_priority_news],
-            trigger=IntervalTrigger(hours=6),
-            id='fetch_medium_priority',
-            name='抓取中优先级新闻',
-            replace_existing=True
-        )
-        
-        # 低优先级新闻：每天凌晨2点抓取
-        self.scheduler.add_job(
-            self._run_async_job,
-            args=[self.jobs.fetch_low_priority_news],
-            trigger=CronTrigger(hour=2, minute=0),
-            id='fetch_low_priority',
-            name='抓取低优先级新闻',
+            id='fetch_all_news',
+            name='抓取所有新闻',
             replace_existing=True
         )
         
@@ -123,9 +103,9 @@ class NewsScheduler:
     async def run_forever(self):
         """持续运行"""
         try:
-            # 启动时立即执行一次高优先级抓取
+            # 启动时立即执行一次所有新闻抓取
             logger.info("启动时执行初始抓取...")
-            await self.jobs.fetch_high_priority_news()
+            await self.jobs.fetch_all_news()
             
             # 保持运行
             while True:
