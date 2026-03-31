@@ -42,6 +42,41 @@ class NewsArticle(BaseModel):
     translated: bool = Field(default=False, description="是否已翻译")
     validated: bool = Field(default=False, description="是否已验证")
     
+    @classmethod
+    def from_dict(cls, data: dict, fetcher=None) -> "NewsArticle":
+        """
+        从字典创建 NewsArticle，统一替代各处散落的手动转换逻辑。
+
+        Args:
+            data: 新闻字典数据
+            fetcher: 可选的抓取器实例，用于补充 language 等默认值
+        """
+        default_lang = getattr(fetcher, 'language', 'en') if fetcher else 'en'
+        return cls(
+            id=data.get('id'),
+            title=data.get('title'),
+            title_zh=data.get('title_zh', ''),
+            title_en=data.get('title_en', ''),
+            content=data.get('content'),
+            content_zh=data.get('content_zh', ''),
+            content_en=data.get('content_en', ''),
+            source=data.get('source'),
+            language=data.get('language', default_lang),
+            url=data.get('url'),
+            published_at=data.get('published_at'),
+            fetched_at=data.get('fetched_at', datetime.now()),
+            category=data.get('category', '综合'),
+            priority=data.get('priority', 5),
+            tags=data.get('tags', []),
+            credibility_score=data.get('credibility_score', 0.0),
+            fact_checked=data.get('fact_checked', False),
+            cross_references=data.get('cross_references', 0),
+            verification_labels=data.get('verification_labels', []),
+            warnings=data.get('warnings', []),
+            translated=data.get('translated', False),
+            validated=data.get('validated', False),
+        )
+
     class Config:
         json_schema_extra = {
             "example": {

@@ -245,7 +245,7 @@ class Database:
 
     def get_articles(
         self,
-        limit: int = 20,
+        limit: Optional[int] = None,
         offset: int = 0,
         source: Optional[str] = None,
         category: Optional[str] = None,
@@ -256,7 +256,7 @@ class Database:
         获取新闻列表
 
         Args:
-            limit: 返回数量限制
+            limit: 返回数量限制，None 表示不限制
             offset: 偏移量
             source: 筛选新闻源
             category: 筛选分类
@@ -270,8 +270,13 @@ class Database:
             with self._get_connection() as conn:
                 cursor = conn.cursor()
                 where, params = self._build_filter_clause(source, category, min_credibility, days)
-                query = f"SELECT * FROM articles {where} ORDER BY priority DESC, published_at DESC LIMIT ? OFFSET ?"
-                params.extend([limit, offset])
+                query = f"SELECT * FROM articles {where} ORDER BY priority DESC, published_at DESC"
+
+                # 仅在指定 limit 时添加分页子句
+                if limit is not None:
+                    query += " LIMIT ? OFFSET ?"
+                    params.extend([limit, offset])
+
                 logger.info(f"执行查询: {query} 参数: {params}")
                 cursor.execute(query, params)
                 result = [self._row_to_article(row) for row in cursor.fetchall()]

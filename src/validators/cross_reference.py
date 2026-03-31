@@ -75,8 +75,7 @@ class CrossReferenceValidator(BaseValidator):
         
         # 从数据库获取候选新闻
         candidates = self.db.get_articles(
-            days=2,  # 最近2天
-            limit=500
+            days=2,
         )
         
         # 过滤时间窗口

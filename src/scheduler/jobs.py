@@ -28,45 +28,20 @@ class NewsJobs:
     async def _fetch_from_sources(self, fetchers):
         """从指定新闻源抓取"""
         total = 0
-        
+
         for fetcher in fetchers:
             try:
                 articles = await fetcher.fetch()
-                
-                # 将Dict转换为NewsArticle对象
+
                 from src.storage.models import NewsArticle
                 for article_dict in articles:
-                    # 标准化新闻数据
                     article_dict = fetcher.normalize_article(article_dict)
-                    if fetcher.validate_article(article_dict):
-                        # 创建NewsArticle对象
-                        article_obj = NewsArticle(
-                            id=article_dict.get('id'),
-                            title=article_dict.get('title'),
-                            title_zh=article_dict.get('title_zh', ''),
-                            title_en=article_dict.get('title_en', ''),
-                            content=article_dict.get('content'),
-                            content_zh=article_dict.get('content_zh', ''),
-                            content_en=article_dict.get('content_en', ''),
-                            source=article_dict.get('source'),
-                            language=article_dict.get('language', getattr(fetcher, 'language', 'en')),
-                            url=article_dict.get('url'),
-                            published_at=article_dict.get('published_at'),
-                            fetched_at=article_dict.get('fetched_at', datetime.now()),
-                            category=article_dict.get('category', '综合'),
-                            priority=article_dict.get('priority', 5),
-                            tags=article_dict.get('tags', []),
-                            credibility_score=article_dict.get('credibility_score', 0.0),
-                            fact_checked=article_dict.get('fact_checked', False),
-                            cross_references=article_dict.get('cross_references', 0),
-                            verification_labels=article_dict.get('verification_labels', []),
-                            warnings=article_dict.get('warnings', []),
-                            translated=article_dict.get('translated', False),
-                            validated=article_dict.get('validated', False)
-                        )
-                        # 保存到数据库
-                        if self.db.save_article(article_obj):
-                            total += 1
+                    if not fetcher.validate_article(article_dict):
+                        continue
+                    # 使用 from_dict 统一转换，消除重复逻辑
+                    article_obj = NewsArticle.from_dict(article_dict, fetcher)
+                    if self.db.save_article(article_obj):
+                        total += 1
                     
                 logger.info(f"[{fetcher.source_name}] 抓取了 {len(articles)} 篇新闻")
                 
