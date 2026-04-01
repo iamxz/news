@@ -1,6 +1,6 @@
 """测试抖音热榜抓取器"""
 import asyncio
-from src.fetchers.douyin import DouyinFetcher
+from src.fetchers import DouyinFetcher
 from src.utils.logger import logger
 
 async def test_douyin_fetcher():
