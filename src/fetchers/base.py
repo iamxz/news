@@ -43,7 +43,7 @@ class BaseFetcher(ABC):
         })
         
         # 设置代理
-        if self.settings.enable_proxy and (self.settings.http_proxy or self.settings.https_proxy):
+        if self.settings.http_proxy or self.settings.https_proxy:
             session.proxies = {
                 'http': self.settings.http_proxy,
                 'https': self.settings.https_proxy
@@ -70,7 +70,7 @@ class BaseFetcher(ABC):
             logger.debug(f"[{self.source_name}] 等待 {self.default_delay} 秒后请求: {url}")
             time.sleep(self.default_delay)
             
-            response = self.session.request(method, url, timeout=30, **kwargs)
+            response = self.session.request(method, url, timeout=self.settings.request_timeout, **kwargs)
             response.raise_for_status()
             
             logger.info(f"[{self.source_name}] 成功请求: {url}")
@@ -88,7 +88,7 @@ class BaseFetcher(ABC):
     
     def _parse_feed(self, feed_url: str):
         """
-        解析 RSS 源，代理开启时通过 session 获取内容确保走代理
+        解析 RSS 源，通过 session 获取内容
         
         Args:
             feed_url: RSS 源 URL
@@ -96,47 +96,17 @@ class BaseFetcher(ABC):
         Returns:
             feedparser 解析后的 feed 对象，网络错误时返回空对象
         """
-        if not self.settings.enable_proxy:
-            try:
-                # 这样可以确保不使用环境变量中的代理设置
-                response = self._make_request(feed_url)
-                if response is not None:
-                    return feedparser.parse(response.content)
-                else:
-                    # 如果请求失败，返回一个空的 feed 对象
-                    feed = feedparser.FeedParserDict()
-                    feed.bozo = True
-                    feed.bozo_exception = Exception(f"网络错误，无法请求 RSS 源: {feed_url}")
-                    feed.entries = []
-                    return feed
-            except Exception as e:
-                logger.error(f"[{self.source_name}] 解析 RSS 源失败: {e}")
-                # 返回一个空的 feed 对象
-                feed = feedparser.FeedParserDict()
-                feed.bozo = True
-                feed.bozo_exception = e
-                feed.entries = []
-                return feed
-        
-        # 代理开启时，先通过 session（已配代理）获取内容
+        # 通过 session 获取内容
         response = self._make_request(feed_url)
         if response is not None:
             try:
                 return feedparser.parse(response.content)
             except Exception as e:
                 logger.error(f"[{self.source_name}] 解析 RSS 源失败: {e}")
-                # 返回一个空的 feed 对象
-                feed = feedparser.FeedParserDict()
-                feed.bozo = True
-                feed.bozo_exception = e
-                feed.entries = []
-                return feed
-        
-        # 如果请求失败（网络移除），返回一个空的 feed 对象
-        logger.warning(f"[{self.source_name}] 网络移除，无法请求 RSS 源: {feed_url}")
+
         feed = feedparser.FeedParserDict()
         feed.bozo = True
-        feed.bozo_exception = Exception(f"网络移除，无法请求 RSS 源: {feed_url}")
+        feed.bozo_exception = Exception(f"无法请求 RSS 源: {feed_url}")
         feed.entries = []
         return feed
     

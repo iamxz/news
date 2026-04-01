@@ -44,12 +44,6 @@ class WeiboFetcher(BaseFetcher):
                 logger.error("微博热搜页面请求失败")
                 return []
 
-            # 尝试再次请求，使用同一个 session
-            response = self._make_request(self.hot_url)
-            if not response:
-                logger.error("微博热搜页面二次请求失败")
-                return []
-
             # 解析 HTML
             articles = self._parse_html(response.text)
 

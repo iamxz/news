@@ -62,9 +62,11 @@ class Settings(BaseSettings):
     cross_ref_search_enabled: bool = Field(default=True, alias="CROSS_REF_SEARCH_ENABLED")
     
     # 代理配置
-    enable_proxy: bool = Field(default=False, alias="ENABLE_PROXY")
     http_proxy: Optional[str] = Field(default=None, alias="HTTP_PROXY")
     https_proxy: Optional[str] = Field(default=None, alias="HTTPS_PROXY")
+    
+    # 网络配置
+    request_timeout: int = Field(default=8, alias="REQUEST_TIMEOUT")
     
     # 日志配置
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")

@@ -36,8 +36,6 @@ class AFPFetcher(BaseFetcher):
                 except Exception as e:
                     logger.error(f"解析条目失败: {e}")
                     continue
-
-            logger.info(f"{self.source_name} 抓取完成: {len(articles)} 条")
             return articles
 
         except Exception as e:
