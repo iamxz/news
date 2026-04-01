@@ -18,7 +18,7 @@ class ZhihuDailyFetcher(BaseFetcher):
     async def fetch(self) -> List[NewsArticle]:
         """抓取知乎日报最新文章列表"""
         try:
-            response = self._make_request(self.api_url, check_robots=False)
+            response = self._make_request(self.api_url)
             if not response or response.status_code != 200:
                 logger.error(
                     f"知乎日报抓取失败: HTTP {response.status_code if response else 'None'}")

@@ -8,13 +8,11 @@ from datetime import datetime
 from typing import Dict, List, Optional
 import time
 
+import feedparser
 import requests
-from bs4 import BeautifulSoup
-
 from src.utils.config import get_settings
 from src.utils.helpers import generate_id, is_valid_url
 from src.utils.logger import logger
-from src.utils.robots import robots_checker
 
 
 class BaseFetcher(ABC):
@@ -53,53 +51,21 @@ class BaseFetcher(ABC):
         
         return session
     
-    def _respect_robots_txt(self, url: str) -> bool:
-        """
-        检查 robots.txt 是否允许抓取
-        
-        Args:
-            url: 要检查的 URL
-        
-        Returns:
-            是否允许抓取
-        """
-        return robots_checker.can_fetch(url, self.settings.user_agent)
-    
-    def _get_delay(self, url: str) -> float:
-        """
-        获取抓取延迟时间
-        
-        Args:
-            url: URL
-        
-        Returns:
-            延迟秒数
-        """
-        crawl_delay = robots_checker.get_crawl_delay(url, self.settings.user_agent)
-        return crawl_delay if crawl_delay is not None else self.default_delay
-    
-    def _make_request(self, url: str, method: str = 'GET', check_robots: bool = True, **kwargs) -> Optional[requests.Response]:
+    def _make_request(self, url: str, method: str = 'GET', **kwargs) -> Optional[requests.Response]:
         """
         发起 HTTP 请求
         
         Args:
             url: 请求 URL
             method: HTTP 方法
-            check_robots: 是否检查 robots.txt（API 请求应设为 False）
             **kwargs: 其他请求参数
         
         Returns:
             响应对象，失败则返回 None
         """
-        if check_robots and not self._respect_robots_txt(url):
-            logger.warning(f"[{self.source_name}] robots.txt 禁止访问: {url}")
-            return None
-        
         try:
-            # 等待延迟
-            delay = self._get_delay(url)
-            logger.debug(f"[{self.source_name}] 等待 {delay} 秒后请求: {url}")
-            time.sleep(delay)
+            logger.debug(f"[{self.source_name}] 等待 {self.default_delay} 秒后请求: {url}")
+            time.sleep(self.default_delay)
             
             response = self.session.request(method, url, timeout=30, **kwargs)
             response.raise_for_status()
@@ -108,8 +74,67 @@ class BaseFetcher(ABC):
             return response
             
         except requests.RequestException as e:
-            logger.error(f"[{self.source_name}] 请求失败 ({url}): {e}")
+            # 网络错误时记录详细日志
+            if isinstance(e, requests.exceptions.ConnectionError):
+                logger.warning(f"[{self.source_name}] 网络连接错误 ({url}): {e}")
+            elif isinstance(e, requests.exceptions.Timeout):
+                logger.warning(f"[{self.source_name}] 请求超时 ({url}): {e}")
+            else:
+                logger.error(f"[{self.source_name}] 请求失败 ({url}): {e}")
             return None
+    
+    def _parse_feed(self, feed_url: str):
+        """
+        解析 RSS 源，代理开启时通过 session 获取内容确保走代理
+        
+        Args:
+            feed_url: RSS 源 URL
+        
+        Returns:
+            feedparser 解析后的 feed 对象，网络错误时返回空对象
+        """
+        if not self.settings.enable_proxy:
+            try:
+                return feedparser.parse(feed_url)
+            except requests.RequestException as e:
+                # 网络错误
+                logger.warning(f"[{self.source_name}] 网络错误，无法访问 RSS 源: {feed_url}, 错误: {e}")
+                # 返回一个空的 feed 对象
+                feed = feedparser.FeedParserDict()
+                feed.bozo = True
+                feed.bozo_exception = e
+                feed.entries = []
+                return feed
+            except Exception as e:
+                logger.error(f"[{self.source_name}] 解析 RSS 源失败: {e}")
+                # 返回一个空的 feed 对象
+                feed = feedparser.FeedParserDict()
+                feed.bozo = True
+                feed.bozo_exception = e
+                feed.entries = []
+                return feed
+        
+        # 代理开启时，先通过 session（已配代理）获取内容
+        response = self._make_request(feed_url)
+        if response is not None:
+            try:
+                return feedparser.parse(response.content)
+            except Exception as e:
+                logger.error(f"[{self.source_name}] 解析 RSS 源失败: {e}")
+                # 返回一个空的 feed 对象
+                feed = feedparser.FeedParserDict()
+                feed.bozo = True
+                feed.bozo_exception = e
+                feed.entries = []
+                return feed
+        
+        # 如果请求失败（网络移除），返回一个空的 feed 对象
+        logger.warning(f"[{self.source_name}] 网络移除，无法请求 RSS 源: {feed_url}")
+        feed = feedparser.FeedParserDict()
+        feed.bozo = True
+        feed.bozo_exception = Exception(f"网络移除，无法请求 RSS 源: {feed_url}")
+        feed.entries = []
+        return feed
     
     @abstractmethod
     async def fetch(self) -> List[Dict]:

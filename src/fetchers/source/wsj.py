@@ -15,7 +15,7 @@ from src.utils.logger import logger
 
 class WSJFetcher(BaseFetcher):
     """WSJ 新闻抓取器"""
-    
+
     RSS_FEEDS = {
         'world': 'https://feeds.content.dowjones.io/public/rss/RSSWorldNews',
         'markets': 'https://feeds.content.dowjones.io/public/rss/RSSMarketsMain',
@@ -26,7 +26,7 @@ class WSJFetcher(BaseFetcher):
         'economy': 'https://feeds.content.dowjones.io/public/rss/socialeconomyfeed',
         'politics': 'https://feeds.content.dowjones.io/public/rss/socialpoliticsfeed',
     }
-    
+
     def __init__(self):
         super().__init__(
             source_name="Wall Street Journal",
@@ -34,73 +34,67 @@ class WSJFetcher(BaseFetcher):
             default_delay=1.0,
             language="en"
         )
-    
+
     async def fetch(self) -> List[Dict]:
         """
         抓取 WSJ 新闻
-        
+
         Returns:
             新闻列表
         """
         all_articles = []
-        
+
         for category, feed_url in self.RSS_FEEDS.items():
             try:
                 logger.info(f"[{self.source_name}] 抓取 {category} 分类...")
-                
-                feed = feedparser.parse(feed_url)
-                
+
+                feed = self._parse_feed(feed_url)
+
                 if feed.bozo:
                     logger.warning(
                         f"[{self.source_name}] RSS 解析警告 ({category}): {feed.bozo_exception}"
                     )
-                
+
                 articles = self.parse(feed, category)
                 all_articles.extend(articles)
-                
+
                 logger.info(
                     f"[{self.source_name}] {category} 分类获取到 {len(articles)} 篇新闻"
                 )
-                
+
             except Exception as e:
                 logger.error(
                     f"[{self.source_name}] 抓取 {category} 分类时出错: {e}",
                     exc_info=True
                 )
-        
-        # 限制数量
-        max_news = self.settings.max_news_per_source
-        if len(all_articles) > max_news:
-            logger.info(f"[{self.source_name}] 限制新闻数量: {len(all_articles)} -> {max_news}")
-            all_articles = all_articles[:max_news]
-        
+
         return all_articles
-    
+
     def parse(self, feed, category: str) -> List[Dict]:
         """
         解析 RSS feed 数据
-        
+
         Args:
             feed: feedparser 返回的 feed 对象
             category: 新闻分类
-        
+
         Returns:
             解析后的新闻列表
         """
         articles = []
-        
+
         for entry in feed.entries:
             try:
                 published_at = datetime.now()
                 if hasattr(entry, 'published_parsed') and entry.published_parsed:
                     published_at = datetime(*entry.published_parsed[:6])
-                
+
                 content = ''
                 if hasattr(entry, 'summary'):
                     content = clean_html(entry.summary)
                 elif hasattr(entry, 'description'):
                     content = clean_html(entry.description)
-                
+
                 article = {
                     'title': entry.get('title', '').strip(),
                     'url': entry.get('link', '').strip(),
@@ -110,17 +104,17 @@ class WSJFetcher(BaseFetcher):
                     'priority': 8,
                     'tags': [],
                 }
-                
+
                 articles.append(article)
-                
+
             except Exception as e:
                 logger.warning(
                     f"[{self.source_name}] 解析条目时出错: {e}",
                     exc_info=True
                 )
-        
+
         return articles
-    
+
     def _map_category(self, rss_category: str) -> str:
         category_map = {
             'world': '国际',

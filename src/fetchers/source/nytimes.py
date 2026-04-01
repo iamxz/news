@@ -15,7 +15,7 @@ from src.utils.logger import logger
 
 class NYTimesFetcher(BaseFetcher):
     """纽约时报新闻抓取器"""
-    
+
     RSS_FEEDS = {
         'top': 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
         'world': 'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
@@ -23,7 +23,7 @@ class NYTimesFetcher(BaseFetcher):
         'technology': 'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml',
         'science': 'https://rss.nytimes.com/services/xml/rss/nyt/Science.xml',
     }
-    
+
     def __init__(self):
         super().__init__(
             source_name="The New York Times",
@@ -31,33 +31,31 @@ class NYTimesFetcher(BaseFetcher):
             default_delay=1.0,
             language="en"
         )
-    
+
     def fetch(self) -> List[Dict]:
         """抓取纽约时报新闻"""
         all_articles = []
-        
+
         for category, feed_url in self.RSS_FEEDS.items():
             try:
                 logger.info(f"[{self.source_name}] 抓取 {category} 分类...")
-                feed = feedparser.parse(feed_url)
+                feed = self._parse_feed(feed_url)
                 if feed.bozo:
-                    logger.warning(f"[{self.source_name}] RSS 解析警告 ({category}): {feed.bozo_exception}")
-                
+                    logger.warning(
+                        f"[{self.source_name}] RSS 解析警告 ({category}): {feed.bozo_exception}")
+
                 articles = self.parse(feed, category)
                 all_articles.extend(articles)
-                
-                logger.info(f"[{self.source_name}] {category} 分类获取到 {len(articles)} 篇新闻")
-                
+
+                logger.info(
+                    f"[{self.source_name}] {category} 分类获取到 {len(articles)} 篇新闻")
+
             except Exception as e:
-                logger.error(f"[{self.source_name}] 抓取 {category} 分类时出错: {e}", exc_info=True)
-        
-        max_news = self.settings.max_news_per_source
-        if len(all_articles) > max_news:
-            logger.info(f"[{self.source_name}] 限制新闻数量: {len(all_articles)} -> {max_news}")
-            all_articles = all_articles[:max_news]
-        
+                logger.error(
+                    f"[{self.source_name}] 抓取 {category} 分类时出错: {e}", exc_info=True)
+
         return all_articles
-    
+
     def parse(self, feed, category: str) -> List[Dict]:
         """解析 RSS"""
         articles = []
@@ -66,13 +64,13 @@ class NYTimesFetcher(BaseFetcher):
                 published_at = datetime.now()
                 if hasattr(entry, 'published_parsed') and entry.published_parsed:
                     published_at = datetime(*entry.published_parsed[:6])
-                
+
                 content = ''
                 if hasattr(entry, 'summary'):
                     content = clean_html(entry.summary)
                 elif hasattr(entry, 'description'):
                     content = clean_html(entry.description)
-                
+
                 article = {
                     'title': entry.get('title', '').strip(),
                     'url': entry.get('link', '').strip(),
@@ -84,9 +82,10 @@ class NYTimesFetcher(BaseFetcher):
                 }
                 articles.append(article)
             except Exception as e:
-                logger.warning(f"[{self.source_name}] 解析条目时出错: {e}", exc_info=True)
+                logger.warning(
+                    f"[{self.source_name}] 解析条目时出错: {e}", exc_info=True)
         return articles
-    
+
     def _map_category(self, rss_category: str) -> str:
         category_map = {
             'top': '头条',
