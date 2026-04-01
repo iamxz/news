@@ -48,6 +48,9 @@ class BaseFetcher(ABC):
                 'http': self.settings.http_proxy,
                 'https': self.settings.https_proxy
             }
+        else:
+            # 显式设置为空字典，覆盖环境变量中的代理设置
+            session.proxies = {}
         
         return session
     

@@ -9,20 +9,20 @@ from src.utils.config import get_settings
 from src.utils.logger import logger
 
 
-def get_proxies() -> Optional[Dict[str, str]]:
+def get_proxies() -> Dict[str, str]:
     """
     获取代理配置
     
     Returns:
-        代理字典，如果未配置或代理开关关闭则返回 None
+        代理字典，如果未配置或代理开关关闭则返回空字典
     """
     settings = get_settings()
     
     if not settings.enable_proxy:
-        return None
+        return {}
     
     if not settings.http_proxy and not settings.https_proxy:
-        return None
+        return {}
     
     proxies = {}
     if settings.http_proxy:
