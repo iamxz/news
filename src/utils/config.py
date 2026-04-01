@@ -23,7 +23,6 @@ class Settings(BaseSettings):
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
     openai_model: str = Field(default="gpt-4", alias="OPENAI_MODEL")
     deepl_api_key: str = Field(default="", alias="DEEPL_API_KEY")
-    claude_api_key: str = Field(default="", alias="CLAUDE_API_KEY")
     
     # 百度翻译 API
     baidu_app_id: str = Field(default="", alias="BAIDU_APP_ID")
