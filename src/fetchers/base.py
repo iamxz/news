@@ -95,16 +95,17 @@ class BaseFetcher(ABC):
         """
         if not self.settings.enable_proxy:
             try:
-                return feedparser.parse(feed_url)
-            except requests.RequestException as e:
-                # 网络错误
-                logger.warning(f"[{self.source_name}] 网络错误，无法访问 RSS 源: {feed_url}, 错误: {e}")
-                # 返回一个空的 feed 对象
-                feed = feedparser.FeedParserDict()
-                feed.bozo = True
-                feed.bozo_exception = e
-                feed.entries = []
-                return feed
+                # 这样可以确保不使用环境变量中的代理设置
+                response = self._make_request(feed_url)
+                if response is not None:
+                    return feedparser.parse(response.content)
+                else:
+                    # 如果请求失败，返回一个空的 feed 对象
+                    feed = feedparser.FeedParserDict()
+                    feed.bozo = True
+                    feed.bozo_exception = Exception(f"网络错误，无法请求 RSS 源: {feed_url}")
+                    feed.entries = []
+                    return feed
             except Exception as e:
                 logger.error(f"[{self.source_name}] 解析 RSS 源失败: {e}")
                 # 返回一个空的 feed 对象
