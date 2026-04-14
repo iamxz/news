@@ -31,22 +31,19 @@
     <h1 class="text-3xl font-bold text-gray-900 mb-8">系统设置</h1>
 
     <!-- 数据清理 -->
-      <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">数据清理</h2>
-        <div class="flex gap-4 items-center mb-4">
-          <div class="flex items-center">
-            <input type="checkbox" id="cleanAll" class="mr-2" checked />
-            <label for="cleanAll" class="text-gray-700">清理所有新闻</label>
-          </div>
-          <button
-            onclick="cleanOldNews()"
-            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            执行清理
-          </button>
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">数据清理</h2>
+      <div class="flex gap-4 items-center mb-4">
+        <div class="flex items-center">
+          <input type="checkbox" id="cleanAll" class="mr-2" checked />
+          <label for="cleanAll" class="text-gray-700">清理所有新闻</label>
         </div>
-        <div id="cleanStatus" class="text-sm text-gray-600"></div>
+        <button onclick="cleanOldNews()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+          执行清理
+        </button>
       </div>
+      <div id="cleanStatus" class="text-sm text-gray-600"></div>
+    </div>
 
     <!-- 系统信息 -->
     <div class="bg-white rounded-lg shadow p-6">
@@ -66,18 +63,11 @@
 
   <script>
     async function cleanOldNews() {
-      const days = document.getElementById("cleanDays").value;
       const cleanAll = document.getElementById("cleanAll").checked;
       const status = document.getElementById("cleanStatus");
 
-      if (cleanAll) {
-        if (!confirm("确定要清理所有新闻吗？此操作不可恢复！")) {
-          return;
-        }
-      } else {
-        if (!confirm(`确定要清理 ${days} 天前的旧新闻吗？此操作不可恢复！`)) {
-          return;
-        }
+      if (!confirm("确定要清理所有新闻吗？此操作不可恢复！")) {
+        return;
       }
 
       status.textContent = "正在清理...";
@@ -88,7 +78,6 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            days: parseInt(days),
             clean_all: cleanAll,
           }),
         });

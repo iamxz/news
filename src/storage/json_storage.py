@@ -245,38 +245,7 @@ class JSONStorage:
             logger.error(f"获取未翻译新闻失败: {e}", exc_info=True)
             return []
     
-    def delete_old_articles(self, days: int = 30) -> int:
-        """
-        删除旧新闻
-        
-        Args:
-            days: 保留最近多少天的新闻
-        
-        Returns:
-            删除的数量
-        """
-        try:
-            deleted = 0
-            cutoff_date = (datetime.now() - timedelta(days=days)).date()
-            
-            for file_path in self.storage_dir.glob("news_*.json"):
-                try:
-                    file_date_str = file_path.stem.replace("news_", "")
-                    file_date = datetime.strptime(file_date_str, "%Y-%m-%d").date()
-                    
-                    if file_date < cutoff_date:
-                        file_path.unlink()
-                        deleted += 1
-                except Exception as e:
-                    logger.error(f"删除旧文件失败: {e}")
-            
-            logger.info(f"删除 {days} 天前的旧新闻文件: {deleted} 个")
-            return deleted
-            
-        except Exception as e:
-            logger.error(f"删除旧新闻失败: {e}", exc_info=True)
-            return 0
-    
+
     def delete_all_articles(self) -> int:
         """
         删除所有新闻

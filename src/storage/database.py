@@ -278,35 +278,7 @@ class Database:
     
 
     
-    def delete_old_articles(self, days: int = 30) -> int:
-        """
-        删除旧新闻
-        
-        Args:
-            days: 保留最近多少天的新闻
-        
-        Returns:
-            删除的数量
-        """
-        try:
-            cutoff = datetime.now() - timedelta(days=days)
-            
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute(
-                    "DELETE FROM articles WHERE published_at < ?",
-                    (cutoff,)
-                )
-                deleted = cursor.rowcount
-                conn.commit()
-                
-                logger.info(f"删除 {days} 天前的旧新闻: {deleted} 条")
-                return deleted
-                
-        except Exception as e:
-            logger.error(f"删除旧新闻失败: {e}", exc_info=True)
-            return 0
-    
+
     def delete_all_articles(self) -> int:
         """
         删除所有新闻
