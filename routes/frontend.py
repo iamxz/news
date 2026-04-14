@@ -16,7 +16,7 @@ frontend_bp = Blueprint('frontend', __name__)
 @frontend_bp.route('/')
 def index():
     """首页 - 按媒体分类展示当天新闻"""
-    articles = db.get_articles(days=1)
+    articles = db.get_articles()
     logger.info(f"首页获取到 {len(articles)} 条新闻")
 
     # 按媒体名称分组并排序
@@ -38,16 +38,15 @@ def list_page():
     source = request.args.get('source', '')
     category = request.args.get('category', '')
     min_credibility = request.args.get('min_credibility', 0.0, type=float)
-    days = request.args.get('days', 30, type=int)
     PER_PAGE = 50
     articles = db.get_articles(
         source=source, category=category,
-        min_credibility=min_credibility, days=days,
+        min_credibility=min_credibility,
         limit=PER_PAGE, offset=(page - 1) * PER_PAGE,
     )
     total = db.count_articles(
         source=source, category=category,
-        min_credibility=min_credibility, days=days,
+        min_credibility=min_credibility,
     )
     total_pages = (total + PER_PAGE - 1) // PER_PAGE
 
@@ -62,7 +61,6 @@ def list_page():
         current_source=source,
         current_category=category,
         min_credibility=min_credibility,
-        days=days,
     )
 
 

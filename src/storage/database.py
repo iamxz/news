@@ -77,11 +77,6 @@ class Database:
                 ON articles(category)
             """)
             
-            cursor.execute("""
-                CREATE INDEX IF NOT EXISTS idx_credibility 
-                ON articles(credibility_score DESC)
-            """)
-            
             conn.commit()
             logger.info(f"数据库初始化完成: {self.db_path}")
     
@@ -196,7 +191,6 @@ class Database:
         self,
         source: Optional[str],
         category: Optional[str],
-        min_credibility: Optional[float],
     ) -> Tuple[str, list]:
         """
         构建公共过滤条件，供 get_articles 和 count_articles 共用。
@@ -213,9 +207,6 @@ class Database:
         if category and category != '':
             clause += " AND category = ?"
             params.append(category)
-        if min_credibility is not None:
-            clause += " AND credibility_score >= ?"
-            params.append(min_credibility)
 
         return clause, params
 
@@ -225,7 +216,6 @@ class Database:
         offset: int = 0,
         source: Optional[str] = None,
         category: Optional[str] = None,
-        min_credibility: Optional[float] = None
     ) -> List[NewsArticle]:
         """
         获取新闻列表
@@ -235,7 +225,6 @@ class Database:
             offset: 偏移量
             source: 筛选新闻源
             category: 筛选分类
-            min_credibility: 最低可信度
 
         Returns:
             新闻列表
@@ -243,7 +232,7 @@ class Database:
         try:
             with self._get_connection() as conn:
                 cursor = conn.cursor()
-                where, params = self._build_filter_clause(source, category, min_credibility)
+                where, params = self._build_filter_clause(source, category)
                 query = f"SELECT * FROM articles {where} ORDER BY priority DESC, published_at DESC"
 
                 # 仅在指定 limit 时添加分页子句
@@ -381,7 +370,6 @@ class Database:
         self,
         source: Optional[str] = None,
         category: Optional[str] = None,
-        min_credibility: Optional[float] = None
     ) -> int:
         """
         统计符合条件的新闻数量
@@ -389,7 +377,6 @@ class Database:
         Args:
             source: 筛选新闻源
             category: 筛选分类
-            min_credibility: 最低可信度
 
         Returns:
             新闻数量
@@ -397,7 +384,7 @@ class Database:
         try:
             with self._get_connection() as conn:
                 cursor = conn.cursor()
-                where, params = self._build_filter_clause(source, category, min_credibility)
+                where, params = self._build_filter_clause(source, category)
                 cursor.execute(f"SELECT COUNT(*) FROM articles {where}", params)
                 return cursor.fetchone()[0]
         except Exception as e:

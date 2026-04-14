@@ -166,7 +166,6 @@ class JSONStorage:
         offset: int = 0,
         source: Optional[str] = None,
         category: Optional[str] = None,
-        min_credibility: Optional[float] = None
     ) -> List[NewsArticle]:
         """
         获取新闻列表
@@ -176,22 +175,19 @@ class JSONStorage:
             offset: 偏移量
             source: 筛选新闻源
             category: 筛选分类
-            min_credibility: 最低可信度
 
         Returns:
             新闻列表
         """
         try:
             articles = self._read_articles()
-            
+
             # 过滤
             filtered_articles = []
             for article_dict in articles:
                 if source and article_dict.get('source') != source:
                     continue
                 if category and article_dict.get('category') != category:
-                    continue
-                if min_credibility is not None and article_dict.get('credibility_score', 0) < min_credibility:
                     continue
                 filtered_articles.append(article_dict)
             
@@ -337,7 +333,6 @@ class JSONStorage:
         self,
         source: Optional[str] = None,
         category: Optional[str] = None,
-        min_credibility: Optional[float] = None
     ) -> int:
         """
         统计符合条件的新闻数量
@@ -345,7 +340,6 @@ class JSONStorage:
         Args:
             source: 筛选新闻源
             category: 筛选分类
-            min_credibility: 最低可信度
 
         Returns:
             新闻数量
@@ -353,16 +347,14 @@ class JSONStorage:
         try:
             articles = self._read_articles()
             count = 0
-            
+
             for article_dict in articles:
                 if source and article_dict.get('source') != source:
                     continue
                 if category and article_dict.get('category') != category:
                     continue
-                if min_credibility is not None and article_dict.get('credibility_score', 0) < min_credibility:
-                    continue
                 count += 1
-            
+
             return count
         except Exception as e:
             logger.error(f"统计新闻数量失败: {e}", exc_info=True)

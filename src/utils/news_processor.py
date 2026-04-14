@@ -252,19 +252,11 @@ class NewsProcessor:
 
             # 合并集合类字段
             merged_article.tags = list(set(merged_article.tags + article.tags))
-            merged_article.verification_labels = list(
-                set(merged_article.verification_labels + article.verification_labels)
-            )
-            merged_article.warnings = list(set(merged_article.warnings + article.warnings))
 
-            # 取最高可信度，最高优先级，累计交叉引用
-            if article.credibility_score > merged_article.credibility_score:
-                merged_article.credibility_score = article.credibility_score
+            # 取最高优先级
             if article.priority > merged_article.priority:
                 merged_article.priority = article.priority
-            merged_article.cross_references += article.cross_references + 1
 
-        merged_article.validated = True
         return merged_article
     
     def process_articles(self, articles: List[NewsArticle]) -> List[NewsArticle]:

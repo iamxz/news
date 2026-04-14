@@ -77,14 +77,7 @@ class NewsArticle(BaseModel):
                 "published_at": "2026-02-04T10:00:00",
                 "category": "国际",
                 "priority": 9,
-                "tags": ["breaking", "politics"],
-                "credibility_score": 0.95,
-                "bias_rating": "neutral",
-                "bias_score": 0.15,
-                "fact_checked": True,
-                "cross_references": 5,
-                "verification_labels": ["高可信度", "客观报道"],
-                "warnings": []
+                "tags": ["breaking", "politics"]
             }
         }
 

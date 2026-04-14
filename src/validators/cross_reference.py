@@ -74,9 +74,7 @@ class CrossReferenceValidator(BaseValidator):
         time_window_end = article.published_at + timedelta(hours=24)
         
         # 从数据库获取候选新闻
-        candidates = self.db.get_articles(
-            days=2,
-        )
+        candidates = self.db.get_articles()
         
         # 过滤时间窗口
         candidates = [

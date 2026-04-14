@@ -130,8 +130,7 @@ class ToutiaoFetcher(BaseFetcher):
                                 published_at=published_at,
                                 category='热搜',
                                 priority=8,
-                                tags=['热搜', '头条'],
-                                credibility_score=0.75
+                                tags=['热搜', '头条']
                             )
                             articles.append(article)
 
