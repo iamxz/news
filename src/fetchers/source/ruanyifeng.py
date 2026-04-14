@@ -58,8 +58,7 @@ class RuanyifengFetcher(BaseFetcher):
                 published_at=published_at,
                 category='科技',
                 priority=7,
-                tags=['科技', '博客', '编程'],
-                credibility_score=0.85
+                tags=['科技', '博客', '编程']
             )
 
         except Exception as e:

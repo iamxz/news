@@ -15,13 +15,12 @@ from src.storage.models import NewsArticle
 from src.utils.logger import logger
 
 
-def fetch_news(sources: Optional[List[str]] = None, days: Optional[int] = None) -> List[NewsArticle]:
+def fetch_news(sources: Optional[List[str]] = None) -> List[NewsArticle]:
     """
     抓取新闻
     
     Args:
         sources: 新闻源列表，None表示所有新闻源
-        days: 抓取最近几天的新闻，None表示不限制
     
     Returns:
         新闻列表
@@ -103,13 +102,12 @@ def main():
     """
     parser = argparse.ArgumentParser(description='新闻抓取Skill')
     parser.add_argument('--sources', nargs='+', help='指定新闻源，多个新闻源用空格分隔')
-    parser.add_argument('--days', type=int, help='抓取最近几天的新闻')
     parser.add_argument('--output', default='json', choices=['json', 'text'], help='输出格式')
     
     args = parser.parse_args()
     
     # 抓取新闻
-    articles = fetch_news(args.sources, args.days)
+    articles = fetch_news(args.sources)
     
     # 格式化输出
     output = format_output(articles, args.output)

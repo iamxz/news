@@ -45,8 +45,11 @@ class Settings(BaseSettings):
         default=Path("./data/news.db"),
         alias="DATABASE_PATH"
     )
-    redis_url: str = Field(default="redis://localhost:6379", alias="REDIS_URL")
-    
+    json_storage_dir: Path = Field(
+        default=Path("./data/json"),
+        alias="JSON_STORAGE_DIR"
+    )
+ 
     # 抓取配置
     fetch_interval: str = Field(default="6h", alias="FETCH_INTERVAL")
     news_retention_days: int = Field(default=30, alias="NEWS_RETENTION_DAYS")
@@ -54,12 +57,6 @@ class Settings(BaseSettings):
         default="NewsAggregator/1.0 (+https://github.com/yourname/news)",
         alias="USER_AGENT"
     )
-    
-    # 验证配置
-    enable_credibility_check: bool = Field(default=True, alias="ENABLE_CREDIBILITY_CHECK")
-    enable_fact_check: bool = Field(default=True, alias="ENABLE_FACT_CHECK")
-    min_credibility_threshold: float = Field(default=0.5, alias="MIN_CREDIBILITY_THRESHOLD")
-    cross_ref_search_enabled: bool = Field(default=True, alias="CROSS_REF_SEARCH_ENABLED")
     
     # 代理配置
     http_proxy: Optional[str] = Field(default=None, alias="HTTP_PROXY")

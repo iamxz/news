@@ -1,7 +1,7 @@
 """
 API 接口路由
 
-提供翻译、抓取、验证、清理、调度器等 RESTful 接口
+提供翻译、抓取、清理、调度器等 RESTful 接口
 """
 import asyncio
 
@@ -190,58 +190,16 @@ def admin_translate_all():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@api_bp.route('/admin/validate-all', methods=['POST'])
-def admin_validate_all():
-    """验证所有未验证的新闻"""
-    try:
-        data = request.get_json()
-        limit = data.get('limit', 50)
-
-        articles = db.get_unvalidated_articles(limit=limit)
-        if not articles:
-            return jsonify({'success': True, 'validated': 0, 'message': '没有需要验证的新闻'})
-
-        validated_count = 0
-        for article in articles:
-            try:
-                article.validated = True
-                db.save_article(article)
-                validated_count += 1
-            except Exception as e:
-                logger.error(f"验证新闻失败 {article.id}: {e}")
-                continue
-
-        return jsonify({
-            'success': True,
-            'validated': validated_count,
-            'total': len(articles),
-            'message': f'成功验证 {validated_count}/{len(articles)} 条新闻',
-        })
-    except Exception as e:
-        logger.error(f"批量验证失败: {e}", exc_info=True)
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-
 @api_bp.route('/admin/clean', methods=['POST'])
 def admin_clean():
     """清理新闻"""
     try:
-        data = request.get_json()
-        clean_all = data.get('clean_all', False)
-
-        if clean_all:
-            deleted = db.delete_all_articles()
-            message = f'成功清理所有 {deleted} 条新闻'
-        else:
-            days = data.get('days', 30)
-            deleted = db.delete_old_articles(days=days)
-            message = f'成功清理 {deleted} 条旧新闻'
-
+        deleted = db.delete_all_articles()
+        message = f'成功清理所有 {deleted} 条新闻'
         return jsonify({'success': True, 'deleted': deleted, 'message': message})
     except Exception as e:
         logger.error(f"清理失败: {e}", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500
-
 
 # ==================== 调度器 API ====================
 

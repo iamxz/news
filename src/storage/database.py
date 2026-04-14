@@ -57,13 +57,7 @@ class Database:
                     category TEXT,
                     priority INTEGER,
                     tags TEXT,
-                    credibility_score REAL,
-                    fact_checked BOOLEAN,
-                    cross_references INTEGER,
-                    verification_labels TEXT,
-                    warnings TEXT,
-                    translated BOOLEAN DEFAULT 0,
-                    validated BOOLEAN DEFAULT 0
+                    translated BOOLEAN DEFAULT 0
                 )
             """)
             
@@ -106,25 +100,19 @@ class Database:
                 cursor = conn.cursor()
 
                 tags_json = json.dumps(article.tags, ensure_ascii=False)
-                labels_json = json.dumps(article.verification_labels, ensure_ascii=False)
-                warnings_json = json.dumps(article.warnings, ensure_ascii=False)
-                
+
                 cursor.execute("""
                     INSERT OR REPLACE INTO articles (
                         id, title, title_zh, title_en, content, content_zh, content_en, source, url,
                         published_at, fetched_at, category, priority, tags,
-                        credibility_score, fact_checked,
-                        cross_references, verification_labels, warnings,
-                        translated, validated
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        translated
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     article.id, article.title, article.title_zh, article.title_en,
                     article.content, article.content_zh, article.content_en, article.source, article.url,
                     article.published_at, article.fetched_at, article.category,
-                    article.priority, tags_json, article.credibility_score,
-                    article.fact_checked,
-                    article.cross_references, labels_json, warnings_json,
-                    article.translated, article.validated
+                    article.priority, tags_json,
+                    article.translated
                 ))
                 
                 conn.commit()
@@ -155,26 +143,20 @@ class Database:
                 for article in articles:
                     try:
                         tags_json = json.dumps(article.tags, ensure_ascii=False)
-                        labels_json = json.dumps(article.verification_labels, ensure_ascii=False)
-                        warnings_json = json.dumps(article.warnings, ensure_ascii=False)
 
                         cursor.execute("""
                             INSERT OR REPLACE INTO articles (
                                 id, title, title_zh, title_en, content, content_zh, content_en,
                                 source, url, published_at, fetched_at, category, priority, tags,
-                                credibility_score, fact_checked,
-                                cross_references, verification_labels, warnings,
-                                translated, validated
-                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                translated
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """, (
                             article.id, article.title, article.title_zh, article.title_en,
                             article.content, article.content_zh, article.content_en,
                             article.source, article.url,
                             article.published_at, article.fetched_at, article.category,
-                            article.priority, tags_json, article.credibility_score,
-                            article.fact_checked,
-                            article.cross_references, labels_json, warnings_json,
-                            article.translated, article.validated
+                            article.priority, tags_json,
+                            article.translated
                         ))
                         count += 1
                     except Exception as e:
@@ -215,7 +197,6 @@ class Database:
         source: Optional[str],
         category: Optional[str],
         min_credibility: Optional[float],
-        days: Optional[int],
     ) -> Tuple[str, list]:
         """
         构建公共过滤条件，供 get_articles 和 count_articles 共用。
@@ -235,11 +216,6 @@ class Database:
         if min_credibility is not None:
             clause += " AND credibility_score >= ?"
             params.append(min_credibility)
-        if days is not None:
-            cutoff = datetime.now() - timedelta(days=days)
-            cutoff_str = cutoff.isoformat()
-            clause += " AND published_at >= ?"
-            params.append(cutoff_str)
 
         return clause, params
 
@@ -249,8 +225,7 @@ class Database:
         offset: int = 0,
         source: Optional[str] = None,
         category: Optional[str] = None,
-        min_credibility: Optional[float] = None,
-        days: Optional[int] = None
+        min_credibility: Optional[float] = None
     ) -> List[NewsArticle]:
         """
         获取新闻列表
@@ -261,7 +236,6 @@ class Database:
             source: 筛选新闻源
             category: 筛选分类
             min_credibility: 最低可信度
-            days: 最近几天的新闻
 
         Returns:
             新闻列表
@@ -269,7 +243,7 @@ class Database:
         try:
             with self._get_connection() as conn:
                 cursor = conn.cursor()
-                where, params = self._build_filter_clause(source, category, min_credibility, days)
+                where, params = self._build_filter_clause(source, category, min_credibility)
                 query = f"SELECT * FROM articles {where} ORDER BY priority DESC, published_at DESC"
 
                 # 仅在指定 limit 时添加分页子句
@@ -313,32 +287,7 @@ class Database:
             logger.error(f"获取未翻译新闻失败: {e}", exc_info=True)
             return []
     
-    def get_unvalidated_articles(self, limit: int = 10) -> List[NewsArticle]:
-        """
-        获取未验证的新闻
-        
-        Args:
-            limit: 数量限制
-        
-        Returns:
-            未验证的新闻列表
-        """
-        try:
-            with self._get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("""
-                    SELECT * FROM articles 
-                    WHERE validated = 0 
-                    ORDER BY priority DESC, published_at DESC 
-                    LIMIT ?
-                """, (limit,))
-                
-                rows = cursor.fetchall()
-                return [self._row_to_article(row) for row in rows]
-                
-        except Exception as e:
-            logger.error(f"获取未验证新闻失败: {e}", exc_info=True)
-            return []
+
     
     def delete_old_articles(self, days: int = 30) -> int:
         """
@@ -418,15 +367,10 @@ class Database:
                 cursor.execute("SELECT COUNT(*) FROM articles WHERE translated = 1")
                 translated = cursor.fetchone()[0]
                 
-                # 验证状态
-                cursor.execute("SELECT COUNT(*) FROM articles WHERE validated = 1")
-                validated = cursor.fetchone()[0]
-                
                 return {
                     'total': total,
                     'by_source': by_source,
-                    'translated': translated,
-                    'validated': validated
+                    'translated': translated
                 }
                 
         except Exception as e:
@@ -437,8 +381,7 @@ class Database:
         self,
         source: Optional[str] = None,
         category: Optional[str] = None,
-        min_credibility: Optional[float] = None,
-        days: Optional[int] = None
+        min_credibility: Optional[float] = None
     ) -> int:
         """
         统计符合条件的新闻数量
@@ -447,7 +390,6 @@ class Database:
             source: 筛选新闻源
             category: 筛选分类
             min_credibility: 最低可信度
-            days: 最近几天的新闻
 
         Returns:
             新闻数量
@@ -455,7 +397,7 @@ class Database:
         try:
             with self._get_connection() as conn:
                 cursor = conn.cursor()
-                where, params = self._build_filter_clause(source, category, min_credibility, days)
+                where, params = self._build_filter_clause(source, category, min_credibility)
                 cursor.execute(f"SELECT COUNT(*) FROM articles {where}", params)
                 return cursor.fetchone()[0]
         except Exception as e:
@@ -520,10 +462,10 @@ class Database:
             id=row['id'],
             title=row['title'],
             title_zh=row['title_zh'] or '',
-            title_en=row['title_en'] or '',   # 修复：此前遗漏了 title_en
+            title_en=row['title_en'] or '',
             content=row['content'] or '',
             content_zh=row['content_zh'] or '',
-            content_en=row['content_en'] or '',  # 修复：此前遗漏了 content_en
+            content_en=row['content_en'] or '',
             source=row['source'],
             url=row['url'],
             published_at=datetime.fromisoformat(row['published_at']),
@@ -531,15 +473,9 @@ class Database:
             category=row['category'] or '综合',
             priority=row['priority'] or 5,
             tags=json.loads(row['tags']) if row['tags'] else [],
-            credibility_score=row['credibility_score'] or 0.0,
-            fact_checked=bool(row['fact_checked']),
-            cross_references=row['cross_references'] or 0,
-            verification_labels=json.loads(row['verification_labels']) if row['verification_labels'] else [],
-            warnings=json.loads(row['warnings']) if row['warnings'] else [],
-            translated=bool(row['translated']),
-            validated=bool(row['validated'])
+            translated=bool(row['translated'])
         )
 
 
-# 全局数据库实例
-db = Database()
+# 全局存储实例
+from src.storage.json_storage import json_db as db

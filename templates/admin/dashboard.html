@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理后台 - 全球新闻聚合</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-gray-100">
     <!-- 导航栏 -->
     <nav class="bg-white shadow-lg">
@@ -16,7 +18,6 @@
                     <a href="/admin" class="text-gray-700 hover:text-blue-600">仪表板</a>
                     <a href="/admin/fetch" class="text-gray-700 hover:text-blue-600">抓取管理</a>
                     <a href="/admin/translate" class="text-gray-700 hover:text-blue-600">翻译管理</a>
-                    <a href="/admin/validate" class="text-gray-700 hover:text-blue-600">验证管理</a>
                     <a href="/admin/scheduler" class="text-gray-700 hover:text-blue-600">定时任务</a>
                     <a href="/admin/settings" class="text-gray-700 hover:text-blue-600">系统设置</a>
                 </div>
@@ -40,10 +41,6 @@
                 <div class="text-3xl font-bold text-green-600">{{ stats.translated }}</div>
             </div>
             <div class="bg-white rounded-lg shadow p-6">
-                <div class="text-gray-500 text-sm mb-2">已验证</div>
-                <div class="text-3xl font-bold text-blue-600">{{ stats.validated }}</div>
-            </div>
-            <div class="bg-white rounded-lg shadow p-6">
                 <div class="text-gray-500 text-sm mb-2">新闻源数</div>
                 <div class="text-3xl font-bold text-purple-600">{{ stats.by_source|length }}</div>
             </div>
@@ -63,4 +60,5 @@
         </div>
     </div>
 </body>
+
 </html>

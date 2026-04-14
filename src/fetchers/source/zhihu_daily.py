@@ -84,7 +84,6 @@ class ZhihuDailyFetcher(BaseFetcher):
             category='日报',
             priority=9 if is_top else 5,
             tags=tags,
-            credibility_score=0.9,
         )
 
     def parse(self, raw_data):

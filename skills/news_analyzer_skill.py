@@ -15,19 +15,18 @@ from src.utils.logger import logger
 from skills.utils.skill_helpers import classify_news, generate_summary, format_analysis_result
 
 
-def analyze_news(category: Optional[str] = None, days: Optional[int] = 7) -> Dict[str, List[Dict]]:
+def analyze_news(category: Optional[str] = None) -> Dict[str, List[Dict]]:
     """
     分析新闻
     
     Args:
         category: 分类，可选值：global, financial, domestic, bloomberg
-        days: 分析最近几天的新闻，默认7天
     
     Returns:
         分析结果，按分类组织
     """
     # 从数据库获取新闻
-    articles = db.get_articles(days=days)
+    articles = db.get_articles()
     logger.info(f"获取到 {len(articles)} 篇新闻进行分析")
     
     # 分类和分析
@@ -117,13 +116,12 @@ def main():
     """
     parser = argparse.ArgumentParser(description='新闻分析Skill')
     parser.add_argument('--category', choices=['global', 'financial', 'domestic', 'bloomberg'], help='指定分类')
-    parser.add_argument('--days', type=int, default=7, help='分析最近几天的新闻，默认7天')
     parser.add_argument('--output', default='json', choices=['json', 'text'], help='输出格式')
     
     args = parser.parse_args()
     
     # 分析新闻
-    analysis_results = analyze_news(args.category, args.days)
+    analysis_results = analyze_news(args.category)
     
     # 格式化输出
     output = format_output(analysis_results, args.output)

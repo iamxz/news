@@ -1,13 +1,10 @@
 """
 测试新功能
 
-测试 AFP 抓取器、交叉引用验证、定时任务
+测试 AFP 抓取器、定时任务
 """
 import asyncio
 from src.fetchers.afp import AFPFetcher
-from src.validators.cross_reference import CrossReferenceValidator
-from src.storage.models import NewsArticle
-from datetime import datetime
 
 
 async def test_afp_fetcher():
@@ -30,34 +27,6 @@ async def test_afp_fetcher():
     return articles
 
 
-def test_cross_reference_validator():
-    """测试交叉引用验证器"""
-    print("\n" + "=" * 60)
-    print("测试交叉引用验证器")
-    print("=" * 60)
-    
-    # 创建测试文章
-    article = NewsArticle(
-        id="test-001",
-        title="Breaking News: Major Event Happens",
-        content="This is a test article content.",
-        source="TestSource",
-        url="https://example.com/test",
-        published_at=datetime.now(),
-        category="test",
-        priority=5
-    )
-    
-    validator = CrossReferenceValidator()
-    validated = validator.validate(article)
-    
-    print(f"✅ 交叉引用数: {validated.cross_references}")
-    print(f"✅ 验证标签: {validated.verification_labels}")
-    print(f"✅ 警告信息: {validated.warnings}")
-    
-    return validated
-
-
 async def main():
     """主测试函数"""
     print("🧪 开始测试新功能...\n")
@@ -67,12 +36,6 @@ async def main():
         await test_afp_fetcher()
     except Exception as e:
         print(f"❌ AFP 测试失败: {e}")
-    
-    # 测试交叉引用
-    try:
-        test_cross_reference_validator()
-    except Exception as e:
-        print(f"❌ 交叉引用测试失败: {e}")
     
     print("\n" + "=" * 60)
     print("✅ 所有测试完成")

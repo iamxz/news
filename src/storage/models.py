@@ -31,17 +31,9 @@ class NewsArticle(BaseModel):
     priority: int = Field(default=5, ge=1, le=1000, description="优先级 1-100")
     tags: List[str] = Field(default_factory=list, description="标签列表")
     
-    # 验证信息
-    credibility_score: float = Field(default=0.0, ge=0.0, le=1.0, description="可信度评分")
-    fact_checked: bool = Field(default=False, description="是否经过事实核查")
-    cross_references: int = Field(default=0, ge=0, description="交叉引用数量")
-    verification_labels: List[str] = Field(default_factory=list, description="验证标签")
-    warnings: List[str] = Field(default_factory=list, description="警告信息")
-    
     # 翻译状态
     translated: bool = Field(default=False, description="是否已翻译")
-    validated: bool = Field(default=False, description="是否已验证")
-    
+
     @classmethod
     def from_dict(cls, data: dict, fetcher=None) -> "NewsArticle":
         """
@@ -68,13 +60,7 @@ class NewsArticle(BaseModel):
             category=data.get('category', '综合'),
             priority=data.get('priority', 5),
             tags=data.get('tags', []),
-            credibility_score=data.get('credibility_score', 0.0),
-            fact_checked=data.get('fact_checked', False),
-            cross_references=data.get('cross_references', 0),
-            verification_labels=data.get('verification_labels', []),
-            warnings=data.get('warnings', []),
             translated=data.get('translated', False),
-            validated=data.get('validated', False),
         )
 
     class Config:

@@ -137,8 +137,7 @@ class WeiboFetcher(BaseFetcher):
                         published_at=datetime.now(),
                         category='热搜',
                         priority=priority,
-                        tags=['热搜', '微博'],
-                        credibility_score=0.70
+                        tags=['热搜', '微博']
                     )
                     logger.info(
                         f"微博热搜(备用)第 {i+1} 条: {text[:20]}... 优先级: {priority}")
@@ -194,9 +193,8 @@ class WeiboFetcher(BaseFetcher):
                 url=full_link,
                 published_at=datetime.now(),
                 category='热搜',
-                priority=8,  # 默认优先级，将在 _parse_html 中覆盖
-                tags=['热搜', '微博'],
-                credibility_score=0.70
+                priority=8,
+                tags=['热搜', '微博']
             )
 
         except Exception as e:

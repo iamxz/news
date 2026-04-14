@@ -48,13 +48,6 @@ def translate():
     return render_template('admin/translate.html', articles=untranslated)
 
 
-@admin_bp.route('/validate')
-def validate():
-    """验证管理页面"""
-    unvalidated = db.get_unvalidated_articles(limit=50)
-    return render_template('admin/validate.html', articles=unvalidated)
-
-
 @admin_bp.route('/settings')
 def settings():
     """系统设置页面"""

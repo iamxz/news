@@ -91,9 +91,8 @@ class DouyinFetcher(BaseFetcher):
                 url=link,
                 published_at=published_at,
                 category='热搜',
-                priority=max(1, 10 - (rank // 10)),  # 根据排名降序设置优先级
-                tags=['热搜', '抖音'],
-                credibility_score=0.85
+                priority=max(1, 10 - (rank // 10)),
+                tags=['热搜', '抖音']
             )
 
         except Exception as e:

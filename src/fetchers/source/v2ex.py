@@ -86,8 +86,7 @@ class V2EXFetcher(BaseFetcher):
                 published_at=published_at,
                 category='科技',
                 priority=7,
-                tags=['科技', 'V2EX'],
-                credibility_score=0.75
+                tags=['科技', 'V2EX']
             )
             
         except Exception as e:

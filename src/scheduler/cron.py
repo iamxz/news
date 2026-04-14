@@ -42,16 +42,6 @@ class NewsScheduler:
             replace_existing=True
         )
         
-        # 验证任务：每小时运行一次
-        self.scheduler.add_job(
-            self._run_async_job,
-            args=[self.jobs.validate_pending_news],
-            trigger=IntervalTrigger(hours=1),
-            id='validate_news',
-            name='验证新闻',
-            replace_existing=True
-        )
-        
         # 清理任务：每周日凌晨3点运行
         self.scheduler.add_job(
             self._run_async_job,

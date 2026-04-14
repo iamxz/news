@@ -7,7 +7,6 @@ from datetime import datetime
 from src.fetchers.registry import FETCHERS
 
 from src.translators import translator_manager
-from src.validators import ValidationPipeline
 from src.storage.database import Database
 from src.utils.logger import logger
 
@@ -18,7 +17,6 @@ class NewsJobs:
     def __init__(self):
         self.db = Database()
         self.translator = translator_manager.get_translator()
-        self.validator = ValidationPipeline()
         
         # 动态获取所有抓取器并按中文优先排序
         self.all_fetchers = self._get_all_fetchers_sorted()
@@ -85,43 +83,6 @@ class NewsJobs:
         
         logger.info(f"翻译完成，共 {translated_count} 篇")
     
-    async def validate_pending_news(self):
-        """验证待验证的新闻"""
-        logger.info("开始验证待验证的新闻")
-        
-        # 获取未验证的新闻
-        articles = self.db.get_articles(limit=100)
-        unvalidated = [a for a in articles if not a.validated]
-        
-        if not unvalidated:
-            logger.info("没有待验证的新闻")
-            return
-        
-        validated_count = 0
-        
-        for article in unvalidated[:30]:  # 每次最多验证30篇
-            try:
-                # 验证
-                validated_article = self.validator.validate(article)
-                
-                # 更新数据库
-                self.db.update_validation(
-                    validated_article.id,
-                    validated_article.credibility_score,
-                    validated_article.fact_checked,
-                    validated_article.cross_references,
-                    validated_article.verification_labels,
-                    validated_article.warnings
-                )
-                validated_count += 1
-                
-                logger.debug(f"验证完成: {article.title[:30]}...")
-                
-            except Exception as e:
-                logger.error(f"验证失败 [{article.id}]: {e}")
-        
-        logger.info(f"验证完成，共 {validated_count} 篇")
-    
     def _get_all_fetchers_sorted(self):
         """动态获取所有抓取器并按中文优先排序"""
         # 实例化所有抓取器
@@ -151,9 +112,9 @@ class NewsJobs:
         logger.info("所有新闻源抓取完成")
     
     async def clean_old_news(self):
-        """清理旧新闻（30天前）"""
+        """清理旧新闻"""
         logger.info("开始清理旧新闻")
         
-        deleted = self.db.clean_old_articles(days=30)
+        deleted = self.db.delete_all_articles()
         
         logger.info(f"清理完成，删除了 {deleted} 篇旧新闻")

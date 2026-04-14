@@ -160,14 +160,7 @@ class BaseFetcher(ABC):
         article.setdefault('category', 'general')
         article.setdefault('priority', 5)
         article.setdefault('tags', [])
-        
-        # 验证字段
-        article.setdefault('credibility_score', 0.0)
-        article.setdefault('fact_checked', False)
-        article.setdefault('cross_references', 0)
-        article.setdefault('verification_labels', [])
-        article.setdefault('warnings', [])
-        
+
         return article
     
     def validate_article(self, article: Dict) -> bool:
