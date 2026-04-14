@@ -45,10 +45,6 @@ class Settings(BaseSettings):
         default=Path("./data/news.db"),
         alias="DATABASE_PATH"
     )
-    json_storage_dir: Path = Field(
-        default=Path("./data/json"),
-        alias="JSON_STORAGE_DIR"
-    )
  
     # 抓取配置
     fetch_interval: str = Field(default="6h", alias="FETCH_INTERVAL")

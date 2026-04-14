@@ -437,4 +437,4 @@ class Database:
 
 
 # 全局存储实例
-from src.storage.json_storage import json_db as db
+db = Database()
