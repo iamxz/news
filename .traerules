@@ -17,7 +17,6 @@
 ## 3. 项目架构 (src/)
 - `fetchers/`: 新闻源抓取器 (继承 BaseFetcher)
 - `translators/`: 翻译服务 (OpenAI, DeepL)
-- `validators/`: 验证系统 (可信度评估, 事实核查)
 - `storage/`: 数据库 (SQLite) 和模型
 - `display/`: 命令行界面 (Rich 库)
 - `utils/`: 工具函数 (Config, Logger)
