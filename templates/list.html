@@ -101,11 +101,6 @@
 
             {% if article.category %}
             <span>{{ article.category }}</span>
-            {% endif %} {% if article.credibility_score is not none %}
-            <span
-              class="{% if article.credibility_score >= 0.85 %}text-green-700{% elif article.credibility_score >= 0.7 %}text-blue-700{% elif article.credibility_score >= 0.5 %}text-amber-700{% else %}text-red-700{% endif %}">
-              {{ article.credibility_score|credibility_stars }} {{ "%.2f"|format(article.credibility_score) }}
-            </span>
             {% endif %}
 
             <span>{{ article.published_at|format_datetime }}</span>
