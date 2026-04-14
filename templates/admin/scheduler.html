@@ -1,193 +1,169 @@
 <!doctype html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>定时任务 - 管理后台</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="bg-gray-100">
-    <!-- 导航栏 -->
-    <nav class="bg-white shadow-lg">
-      <div class="max-w-7xl mx-auto px-4">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center space-x-8">
-            <a href="/admin" class="text-xl font-bold text-gray-900"
-              >📊 管理后台</a
-            >
-            <a href="/admin" class="text-gray-700 hover:text-blue-600"
-              >仪表板</a
-            >
-            <a href="/admin/fetch" class="text-gray-700 hover:text-blue-600"
-              >抓取管理</a
-            >
-            <a href="/admin/translate" class="text-gray-700 hover:text-blue-600"
-              >翻译管理</a
-            >
-            <a href="/admin/validate" class="text-gray-700 hover:text-blue-600"
-              >验证管理</a
-            >
-            <a href="/admin/scheduler" class="text-blue-600 font-semibold"
-              >定时任务</a
-            >
-            <a href="/admin/settings" class="text-gray-700 hover:text-blue-600"
-              >系统设置</a
-            >
-          </div>
-          <a href="/" class="text-blue-600 hover:text-blue-800">← 返回前台</a>
-        </div>
-      </div>
-    </nav>
 
-    <!-- 主内容区 -->
-    <div class="max-w-7xl mx-auto px-4 py-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-8">定时任务管理</h1>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>定时任务 - 管理后台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
 
-      <!-- 任务状态 -->
-      <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">任务状态</h2>
-        <div class="flex items-center gap-4 mb-4">
-          <div
-            id="status-indicator"
-            class="w-4 h-4 rounded-full bg-gray-400"
-          ></div>
-          <span id="status-text" class="text-gray-600">检查中...</span>
-          <span id="jobs-count" class="text-sm text-gray-500"></span>
+<body class="bg-gray-100">
+  <!-- 导航栏 -->
+  <nav class="bg-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center space-x-8">
+          <a href="/admin" class="text-xl font-bold text-gray-900">📊 管理后台</a>
+          <a href="/admin" class="text-gray-700 hover:text-blue-600">仪表板</a>
+          <a href="/admin/fetch" class="text-gray-700 hover:text-blue-600">抓取管理</a>
+          <a href="/admin/translate" class="text-gray-700 hover:text-blue-600">翻译管理</a>
+          <a href="/admin/scheduler" class="text-blue-600 font-semibold">定时任务</a>
+          <a href="/admin/settings" class="text-gray-700 hover:text-blue-600">系统设置</a>
         </div>
-        <div class="flex gap-4">
-          <button
-            onclick="startScheduler()"
-            class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          >
-            启动定时任务
-          </button>
-          <button
-            onclick="stopScheduler()"
-            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            停止定时任务
-          </button>
-          <button
-            onclick="checkStatus()"
-            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            刷新状态
-          </button>
-        </div>
-        <div id="message" class="mt-4 text-sm"></div>
-
-        <!-- 任务列表 -->
-        <div id="jobs-list" class="mt-6 space-y-2"></div>
+        <a href="/" class="text-blue-600 hover:text-blue-800">← 返回前台</a>
       </div>
     </div>
+  </nav>
 
-    <script>
-      // 检查状态
-      async function checkStatus() {
-        try {
-          const response = await fetch("/api/admin/scheduler/status");
-          const data = await response.json();
+  <!-- 主内容区 -->
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">定时任务管理</h1>
 
-          if (data.success) {
-            const indicator = document.getElementById("status-indicator");
-            const text = document.getElementById("status-text");
-            const count = document.getElementById("jobs-count");
-            const jobsList = document.getElementById("jobs-list");
+    <!-- 任务状态 -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">任务状态</h2>
+      <div class="flex items-center gap-4 mb-4">
+        <div id="status-indicator" class="w-4 h-4 rounded-full bg-gray-400"></div>
+        <span id="status-text" class="text-gray-600">检查中...</span>
+        <span id="jobs-count" class="text-sm text-gray-500"></span>
+      </div>
+      <div class="flex gap-4">
+        <button onclick="startScheduler()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+          启动定时任务
+        </button>
+        <button onclick="stopScheduler()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+          停止定时任务
+        </button>
+        <button onclick="checkStatus()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+          刷新状态
+        </button>
+      </div>
+      <div id="message" class="mt-4 text-sm"></div>
 
-            if (data.status.running) {
-              indicator.className =
-                "w-4 h-4 rounded-full bg-green-500 animate-pulse";
-              text.textContent = "运行中";
-              text.className = "text-green-600 font-semibold";
-              count.textContent = `(${data.status.jobs_count} 个任务)`;
+      <!-- 任务列表 -->
+      <div id="jobs-list" class="mt-6 space-y-2"></div>
+    </div>
+  </div>
 
-              // 显示任务列表
-              if (data.status.jobs && data.status.jobs.length > 0) {
-                jobsList.innerHTML =
-                  '<h3 class="font-semibold text-gray-900 mb-2">活动任务：</h3>' +
-                  data.status.jobs
-                    .map(
-                      (job) => `
+  <script>
+    // 检查状态
+    async function checkStatus() {
+      try {
+        const response = await fetch("/api/admin/scheduler/status");
+        const data = await response.json();
+
+        if (data.success) {
+          const indicator = document.getElementById("status-indicator");
+          const text = document.getElementById("status-text");
+          const count = document.getElementById("jobs-count");
+          const jobsList = document.getElementById("jobs-list");
+
+          if (data.status.running) {
+            indicator.className =
+              "w-4 h-4 rounded-full bg-green-500 animate-pulse";
+            text.textContent = "运行中";
+            text.className = "text-green-600 font-semibold";
+            count.textContent = `(${data.status.jobs_count} 个任务)`;
+
+            // 显示任务列表
+            if (data.status.jobs && data.status.jobs.length > 0) {
+              jobsList.innerHTML =
+                '<h3 class="font-semibold text-gray-900 mb-2">活动任务：</h3>' +
+                data.status.jobs
+                  .map(
+                    (job) => `
                                     <div class="text-sm text-gray-600 pl-4">
                                         • ${job.name} - 下次运行: ${job.next_run || "未知"}
                                     </div>
                                 `,
-                    )
-                    .join("");
-              }
-            } else {
-              indicator.className = "w-4 h-4 rounded-full bg-red-500";
-              text.textContent = "已停止";
-              text.className = "text-red-600 font-semibold";
-              count.textContent = "";
-              jobsList.innerHTML = "";
+                  )
+                  .join("");
             }
-          }
-        } catch (error) {
-          console.error("检查状态失败:", error);
-        }
-      }
-
-      // 启动定时任务
-      async function startScheduler() {
-        const message = document.getElementById("message");
-        message.textContent = "正在启动...";
-        message.className = "mt-4 text-sm text-blue-600";
-
-        try {
-          const response = await fetch("/api/admin/scheduler/start", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-          });
-
-          const data = await response.json();
-
-          if (data.success) {
-            message.textContent = data.message;
-            message.className = "mt-4 text-sm text-green-600";
-            setTimeout(checkStatus, 1000);
           } else {
-            message.textContent = "启动失败: " + data.error;
-            message.className = "mt-4 text-sm text-red-600";
+            indicator.className = "w-4 h-4 rounded-full bg-red-500";
+            text.textContent = "已停止";
+            text.className = "text-red-600 font-semibold";
+            count.textContent = "";
+            jobsList.innerHTML = "";
           }
-        } catch (error) {
-          message.textContent = "启动失败: " + error.message;
+        }
+      } catch (error) {
+        console.error("检查状态失败:", error);
+      }
+    }
+
+    // 启动定时任务
+    async function startScheduler() {
+      const message = document.getElementById("message");
+      message.textContent = "正在启动...";
+      message.className = "mt-4 text-sm text-blue-600";
+
+      try {
+        const response = await fetch("/api/admin/scheduler/start", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          message.textContent = data.message;
+          message.className = "mt-4 text-sm text-green-600";
+          setTimeout(checkStatus, 1000);
+        } else {
+          message.textContent = "启动失败: " + data.error;
           message.className = "mt-4 text-sm text-red-600";
         }
+      } catch (error) {
+        message.textContent = "启动失败: " + error.message;
+        message.className = "mt-4 text-sm text-red-600";
       }
+    }
 
-      // 停止定时任务
-      async function stopScheduler() {
-        const message = document.getElementById("message");
-        message.textContent = "正在停止...";
-        message.className = "mt-4 text-sm text-blue-600";
+    // 停止定时任务
+    async function stopScheduler() {
+      const message = document.getElementById("message");
+      message.textContent = "正在停止...";
+      message.className = "mt-4 text-sm text-blue-600";
 
-        try {
-          const response = await fetch("/api/admin/scheduler/stop", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-          });
+      try {
+        const response = await fetch("/api/admin/scheduler/stop", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
 
-          const data = await response.json();
+        const data = await response.json();
 
-          if (data.success) {
-            message.textContent = data.message;
-            message.className = "mt-4 text-sm text-green-600";
-            setTimeout(checkStatus, 1000);
-          } else {
-            message.textContent = "停止失败: " + data.error;
-            message.className = "mt-4 text-sm text-red-600";
-          }
-        } catch (error) {
-          message.textContent = "停止失败: " + error.message;
+        if (data.success) {
+          message.textContent = data.message;
+          message.className = "mt-4 text-sm text-green-600";
+          setTimeout(checkStatus, 1000);
+        } else {
+          message.textContent = "停止失败: " + data.error;
           message.className = "mt-4 text-sm text-red-600";
         }
+      } catch (error) {
+        message.textContent = "停止失败: " + error.message;
+        message.className = "mt-4 text-sm text-red-600";
       }
+    }
 
-      // 页面加载时检查状态
-      checkStatus();
-      // 每10秒自动刷新状态
-      setInterval(checkStatus, 10000);
-    </script>
-  </body>
+    // 页面加载时检查状态
+    checkStatus();
+    // 每10秒自动刷新状态
+    setInterval(checkStatus, 10000);
+  </script>
+</body>
+
 </html>

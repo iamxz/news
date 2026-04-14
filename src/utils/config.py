@@ -52,11 +52,16 @@ class Settings(BaseSettings):
  
     # 抓取配置
     fetch_interval: str = Field(default="6h", alias="FETCH_INTERVAL")
-    news_retention_days: int = Field(default=30, alias="NEWS_RETENTION_DAYS")
     user_agent: str = Field(
         default="NewsAggregator/1.0 (+https://github.com/yourname/news)",
         alias="USER_AGENT"
     )
+    
+    # 验证配置
+    enable_credibility_check: bool = Field(default=True, alias="ENABLE_CREDIBILITY_CHECK")
+    enable_fact_check: bool = Field(default=True, alias="ENABLE_FACT_CHECK")
+    min_credibility_threshold: float = Field(default=0.5, alias="MIN_CREDIBILITY_THRESHOLD")
+    cross_ref_search_enabled: bool = Field(default=True, alias="CROSS_REF_SEARCH_ENABLED")
     
     # 代理配置
     http_proxy: Optional[str] = Field(default=None, alias="HTTP_PROXY")
