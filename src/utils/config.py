@@ -60,7 +60,6 @@ class Settings(BaseSettings):
     # 验证配置
     enable_credibility_check: bool = Field(default=True, alias="ENABLE_CREDIBILITY_CHECK")
     enable_fact_check: bool = Field(default=True, alias="ENABLE_FACT_CHECK")
-    min_credibility_threshold: float = Field(default=0.5, alias="MIN_CREDIBILITY_THRESHOLD")
     cross_ref_search_enabled: bool = Field(default=True, alias="CROSS_REF_SEARCH_ENABLED")
     
     # 代理配置

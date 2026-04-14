@@ -37,16 +37,13 @@ def list_page():
     page = request.args.get('page', 1, type=int)
     source = request.args.get('source', '')
     category = request.args.get('category', '')
-    min_credibility = request.args.get('min_credibility', 0.0, type=float)
     PER_PAGE = 50
     articles = db.get_articles(
         source=source, category=category,
-        min_credibility=min_credibility,
         limit=PER_PAGE, offset=(page - 1) * PER_PAGE,
     )
     total = db.count_articles(
         source=source, category=category,
-        min_credibility=min_credibility,
     )
     total_pages = (total + PER_PAGE - 1) // PER_PAGE
 
@@ -60,7 +57,6 @@ def list_page():
         categories=db.get_all_categories(),
         current_source=source,
         current_category=category,
-        min_credibility=min_credibility,
     )
 
 

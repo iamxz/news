@@ -63,20 +63,6 @@
           {% endfor %}
         </select>
 
-        <select name="min_credibility"
-          class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
-          <option value="0" {% if min_credibility==0 %} selected {% endif %}>
-            所有可信度
-          </option>
-          <option value="0.8" {% if min_credibility==0.8 %} selected {% endif %}>
-            高可信度
-          </option>
-          <option value="0.6" {% if min_credibility==0.6 %} selected {% endif %}>
-            中等可信度
-          </option>
-        </select>
-
-
 
         <button type="submit"
           class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
@@ -142,7 +128,7 @@
     <nav class="mt-8 flex justify-center">
       <div class="flex items-center gap-2">
         {% if page > 1 %}
-        <a href="?page={{ page - 1 }}&source={{ current_source }}&category={{ current_category }}&min_credibility={{ min_credibility }}"
+        <a href="?page={{ page - 1 }}&source={{ current_source }}&category={{ current_category }}"
           class="px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition">
           上一页
         </a>
@@ -151,14 +137,14 @@
         {% endif %} {% for p in range(1, total_pages + 1) %} {% if p == page %}
         <span class="px-3 py-2 text-sm bg-blue-600 text-white rounded">{{ p }}</span>
         {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %} <a
-          href="?page={{ p }}&source={{ current_source }}&category={{ current_category }}&min_credibility={{ min_credibility }}"
+          href="?page={{ p }}&source={{ current_source }}&category={{ current_category }}"
           class="px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition">
           {{ p }}
           </a>
           {% elif p == page - 3 or p == page + 3 %}
           <span class="px-2 text-gray-400">...</span>
           {% endif %} {% endfor %} {% if page < total_pages %} <a
-            href="?page={{ page + 1 }}&source={{ current_source }}&category={{ current_category }}&min_credibility={{ min_credibility }}"
+            href="?page={{ page + 1 }}&source={{ current_source }}&category={{ current_category }}"
             class="px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition">
             下一页
             </a>
