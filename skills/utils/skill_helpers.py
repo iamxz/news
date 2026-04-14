@@ -117,18 +117,3 @@ def validate_article(article: NewsArticle) -> bool:
     return bool(article.title and article.content and article.url)
 
 
-def filter_articles_by_date(articles: List[NewsArticle], days: int) -> List[NewsArticle]:
-    """
-    根据日期过滤新闻
-    
-    Args:
-        articles: 新闻列表
-        days: 最近几天
-    
-    Returns:
-        过滤后的新闻列表
-    """
-    from datetime import datetime, timedelta
-    
-    cutoff_date = datetime.now() - timedelta(days=days)
-    return [article for article in articles if article.published_at >= cutoff_date]
