@@ -300,6 +300,26 @@ class Database:
             logger.error(f"删除所有新闻失败: {e}", exc_info=True)
             return 0
     
+    def get_today_articles_count(self) -> int:
+        """
+        获取今天抓取的文章数量
+
+        Returns:
+            今天抓取的文章数量
+        """
+        try:
+            today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT COUNT(*) FROM articles WHERE fetched_at >= ?",
+                    (today.isoformat(),)
+                )
+                return cursor.fetchone()[0]
+        except Exception as e:
+            logger.error(f"获取今日文章数量失败: {e}", exc_info=True)
+            return 0
+
     def get_statistics(self) -> Dict:
         """
         获取数据库统计信息

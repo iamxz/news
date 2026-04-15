@@ -25,6 +25,15 @@ def analyze_news(category: Optional[str] = None) -> Dict[str, List[Dict]]:
     Returns:
         分析结果，按分类组织
     """
+    # 先检查今天是否已抓取
+    today_count = db.get_today_articles_count()
+    if today_count > 0:
+        logger.info(f"今日已抓取 {today_count} 篇新闻，跳过抓取步骤")
+    else:
+        logger.info("今日尚未抓取新闻，先执行抓取...")
+        from skills.news_fetcher_skill import fetch_news
+        fetch_news()
+    
     # 从数据库获取新闻
     articles = db.get_articles()
     logger.info(f"获取到 {len(articles)} 篇新闻进行分析")
