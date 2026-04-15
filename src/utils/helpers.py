@@ -157,3 +157,24 @@ def remove_duplicates(items: list, key: Optional[str] = None) -> list:
             seen.add(value)
             result.append(item)
     return result
+
+
+def model_to_dict(obj: Any) -> Any:
+    """
+    将 Pydantic 模型转换为字典
+    
+    Args:
+        obj: 输入对象
+    
+    Returns:
+        转换后的字典或原始对象
+    """
+    # 检查是否为 Pydantic 模型
+    if hasattr(obj, 'model_dump'):
+        return obj.model_dump()
+    # 检查是否为具有 __dict__ 属性的对象
+    elif hasattr(obj, '__dict__'):
+        return vars(obj)
+    # 其他类型直接返回
+    else:
+        return obj

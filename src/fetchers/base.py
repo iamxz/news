@@ -11,7 +11,7 @@ import time
 import feedparser
 import requests
 from src.utils.config import get_settings
-from src.utils.helpers import generate_id, is_valid_url
+from src.utils.helpers import generate_id, is_valid_url, model_to_dict
 from src.utils.logger import logger
 
 
@@ -143,10 +143,8 @@ class BaseFetcher(ABC):
         Returns:
             标准化后的新闻数据
         """
-        # 如果是 NewsArticle 对象，先转为 dict
-        from src.storage.models import NewsArticle
-        if isinstance(article, NewsArticle):
-            article = article.model_dump() if hasattr(article, 'model_dump') else vars(article)
+        # 转换可能的对象为字典
+        article = model_to_dict(article)
         
         # 生成唯一 ID
         if 'id' not in article:

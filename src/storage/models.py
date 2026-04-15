@@ -80,22 +80,3 @@ class NewsArticle(BaseModel):
                 "tags": ["breaking", "politics"]
             }
         }
-
-
-class SourceCredibility(BaseModel):
-    """新闻源可信度模型"""
-    
-    source_name: str = Field(description="新闻源名称")
-    base_credibility: float = Field(ge=0.0, le=1.0, description="基础可信度")
-    bias_tendency: str = Field(default="neutral", description="偏见倾向")
-    category: str = Field(description="媒体类型")
-    
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "source_name": "Reuters",
-                "base_credibility": 0.95,
-                "bias_tendency": "neutral",
-                "category": "通讯社"
-            }
-        }
