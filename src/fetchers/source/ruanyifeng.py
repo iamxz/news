@@ -2,12 +2,11 @@
 阮一峰的网络日志抓取器
 """
 import hashlib
-from typing import List, Optional
+from typing import List, Optional, Dict
 from datetime import datetime
 import feedparser
 from dateutil import parser as date_parser
 from src.fetchers.base import BaseFetcher
-from src.storage.models import NewsArticle
 from src.utils.logger import logger
 
 
@@ -18,7 +17,7 @@ class RuanyifengFetcher(BaseFetcher):
         super().__init__('阮一峰的网络日志', 'https://www.ruanyifeng.com/blog/', 2.0, 'zh')
         self.rss_url = 'https://www.ruanyifeng.com/blog/atom.xml'
 
-    async def fetch(self) -> List[NewsArticle]:
+    async def fetch(self) -> List[Dict]:
         """抓取博客文章"""
         try:
             feed = self._parse_feed(self.rss_url)
@@ -36,7 +35,7 @@ class RuanyifengFetcher(BaseFetcher):
             logger.error(f"阮一峰博客抓取失败: {e}")
             return []
 
-    def _parse_entry(self, entry) -> Optional[NewsArticle]:
+    def _parse_entry(self, entry) -> Optional[Dict]:
         """解析单篇文章"""
         try:
             title = entry.get('title', '').strip()
@@ -49,17 +48,17 @@ class RuanyifengFetcher(BaseFetcher):
             published_at = self._parse_date(entry.get('published', ''))
             content = entry.get('summary', title)
 
-            return NewsArticle(
-                id=article_id,
-                title=title,
-                content=content,
-                source=self.source_name,
-                url=link,
-                published_at=published_at,
-                category='科技',
-                priority=7,
-                tags=['科技', '博客', '编程']
-            )
+            return {
+                'id': article_id,
+                'title': title,
+                'content': content,
+                'source': self.source_name,
+                'url': link,
+                'published_at': published_at,
+                'category': '科技',
+                'priority': 7,
+                'tags': ['科技', '博客', '编程']
+            }
 
         except Exception as e:
             logger.error(f"解析阮一峰博客失败: {e}")

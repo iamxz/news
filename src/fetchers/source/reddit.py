@@ -29,7 +29,7 @@ class RedditFetcher(BaseFetcher):
             language="en"
         )
 
-    def fetch(self) -> List[Dict]:
+    async def fetch(self) -> List[Dict]:
         all_articles = []
         for category, feed_url in self.RSS_FEEDS.items():
             try:

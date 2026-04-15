@@ -28,7 +28,7 @@ class GuardianFetcher(BaseFetcher):
             language="en"
         )
 
-    def fetch(self) -> List[Dict]:
+    async def fetch(self) -> List[Dict]:
         """抓取卫报新闻"""
         all_articles = []
 

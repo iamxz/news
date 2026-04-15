@@ -32,7 +32,7 @@ class NYTimesFetcher(BaseFetcher):
             language="en"
         )
 
-    def fetch(self) -> List[Dict]:
+    async def fetch(self) -> List[Dict]:
         """抓取纽约时报新闻"""
         all_articles = []
 
