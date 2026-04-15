@@ -311,9 +311,11 @@ class Database:
             today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
             with self._get_connection() as conn:
                 cursor = conn.cursor()
+                # 存储格式是 "YYYY-MM-DD HH:MM:SS.ffffff"，用 strftime 保持一致
+                today_str = today.strftime("%Y-%m-%d %H:%M:%S")
                 cursor.execute(
                     "SELECT COUNT(*) FROM articles WHERE fetched_at >= ?",
-                    (today.isoformat(),)
+                    (today_str,)
                 )
                 return cursor.fetchone()[0]
         except Exception as e:

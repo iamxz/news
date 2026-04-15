@@ -143,6 +143,11 @@ class BaseFetcher(ABC):
         Returns:
             标准化后的新闻数据
         """
+        # 如果是 NewsArticle 对象，先转为 dict
+        from src.storage.models import NewsArticle
+        if isinstance(article, NewsArticle):
+            article = article.model_dump() if hasattr(article, 'model_dump') else vars(article)
+        
         # 生成唯一 ID
         if 'id' not in article:
             id_source = f"{article.get('url', '')}{article.get('title', '')}"
