@@ -27,7 +27,6 @@
 - The New York Times ✅
 - The Washington Post ✅
 - Financial Times ✅
-- The Economist ✅
 - Al Jazeera ✅
 
 ### 科技博客
