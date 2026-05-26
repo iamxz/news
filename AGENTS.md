@@ -1,43 +1,56 @@
-所有回答都使用中文表述。
-如需提供代码，为关键逻辑和可能造成理解困难的部分添加简明的中文注释。
-当生成的代码超过 20 行时，优先考虑是否可以进行适当的抽象或聚合。
+# AGENTS.md
 
-避免不必要的对象复制或克隆。
-避免多层嵌套，提前返回。
-使用适当的并发控制机制。
+所有回答、注释、文档使用中文。
 
+## 启动与命令
 
-小步重构：
-每次只做一个小改动，然后测试。
-频繁提交，保持代码随时可工作。
-测试保障：
-重构前确保有足够的测试。
-每次修改后运行测试，确保行为不变。
-代码审查：
-重构后进行代码审查，确保质量。
+```bash
+# 安装依赖
+make install        # ./install.sh
+# 开发模式
+make dev            # ./dev.sh
+# 启动应用
+make run            # ./start.sh
 
-命名约定：
-使用有意义的、描述性的名称。
-遵循项目或语言的命名规范。
-避免缩写和单字母变量（除非是约定俗成的，如循环中的 `i`）。
-代码组织：
-相关代码放在一起。
-函数只做一件事。
-保持适当的抽象层次。
-注释与文档：
-注释应该解释为什么，而不是做什么。
-为公共 API 提供清晰的文档。
-更新注释以反映代码变化。
+# 应用子命令（main.py）
+python main.py fetch|translate|validate|show|stats|pipeline|clean
 
-内存优化：
-    避免不必要的对象创建。
-    及时释放不再需要的资源。
-    注意内存泄漏问题。
-计算优化：
-    避免重复计算。
-    使用适当的数据结构和算法。
-    延迟计算直到必要时。
-并行优化：
-    识别可并行化的任务。
-    避免不必要的同步。
-    注意线程安全问题。
+# Web 服务器（端口 4000）
+python main.py                  # debug=True
+# 或 python web_server.py
+
+# 代码检查顺序（make check 包含全部）
+make format         # black .
+make lint           # ruff check .
+make type           # mypy src/
+make check          # format → lint-fix → type
+
+# 测试
+make test           # pytest -v
+make test-cov       # pytest --cov=src --cov-report=html --cov-report=term
+pytest tests/path/to/test_file.py -v    # 单文件测试
+```
+
+## 项目结构
+
+- `src/fetchers/source/` — 26 个新闻源抓取器，继承 `BaseFetcher`，通过 `src/fetchers/__init__.py` 自动注册
+- `src/translators/` — 10 个翻译后端（OpenAI, DeepL, Google, Baidu 等），继承 `BaseTranslator`
+- `src/storage/` — SQLite 数据库 + Pydantic 数据模型
+- `routes/` — Flask Blueprint（frontend, admin, api）
+- `templates/` — Jinja2 模板
+- `tests/` — pytest 测试，目录结构镜像 `src/`
+
+## 关键约定
+
+- **入口**: `main.py` 既是 CLI 入口（click），也是 Flask 应用入口（端口 4000）。`pyproject.toml` 注册了 `news` 命令指向 `src.main:main`
+- **配置**: pydantic-settings 从 `.env` 加载，配置类在 `src/utils/config.py`
+- **Fetcher 模式**: 所有抓取器放在 `source/` 目录，类名以 `Fetcher` 结尾（如 `BaiduFetcher`），`BaseFetcher.run()` 自动处理 async 调度和标准化
+- **测试文件**: `tests/` 中既有 `pytest` 测试，也有少数直接运行的脚本（如 `test_baidu_fetcher.py`），后者会被 `pytest` 收集报错但无妨
+- **已有指令文件**: `.traerules`（Trae IDE 规则）、`TRAE_SPEC.md`（Trae 项目规范），修改时同步更新
+
+## 注意事项
+
+- 添加新抓取器：在 `source/` 下新建文件，实现 `BaseFetcher`，无需手动注册
+- 添加新翻译器：在 `translators/` 下新建文件，实现 `BaseTranslator`
+- 添加新依赖：同步更新 `pyproject.toml`、`requirements.txt`、`requirements-dev.txt`
+- 测试用 mock 数据，避免网络请求依赖
