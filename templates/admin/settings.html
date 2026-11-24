@@ -19,6 +19,7 @@
           <a href="/admin/fetch" class="text-gray-700 hover:text-blue-600">抓取管理</a>
           <a href="/admin/translate" class="text-gray-700 hover:text-blue-600">翻译管理</a>
           <a href="/admin/scheduler" class="text-gray-700 hover:text-blue-600">定时任务</a>
+          <a href="/admin/clean" class="text-gray-700 hover:text-blue-600">新闻清理</a>
           <a href="/admin/settings" class="text-blue-600 font-semibold">系统设置</a>
         </div>
         <a href="/" class="text-blue-600 hover:text-blue-800">← 返回前台</a>
@@ -33,16 +34,10 @@
     <!-- 数据清理 -->
     <div class="bg-white rounded-lg shadow p-6 mb-6">
       <h2 class="text-xl font-bold text-gray-900 mb-4">数据清理</h2>
-      <div class="flex gap-4 items-center mb-4">
-        <div class="flex items-center">
-          <input type="checkbox" id="cleanAll" class="mr-2" checked />
-          <label for="cleanAll" class="text-gray-700">清理所有新闻</label>
-        </div>
-        <button onclick="cleanOldNews()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-          执行清理
-        </button>
-      </div>
-      <div id="cleanStatus" class="text-sm text-gray-600"></div>
+      <p class="text-gray-600 text-sm mb-4">支持按日期清理过期新闻或清理全部新闻，请前往专用清理页面操作。</p>
+      <a href="/admin/clean" class="inline-block px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700">
+        前往新闻清理
+      </a>
     </div>
 
     <!-- 系统信息 -->
@@ -62,44 +57,6 @@
   </div>
 
   <script>
-    async function cleanOldNews() {
-      const cleanAll = document.getElementById("cleanAll").checked;
-      const status = document.getElementById("cleanStatus");
-
-      if (!confirm("确定要清理所有新闻吗？此操作不可恢复！")) {
-        return;
-      }
-
-      status.textContent = "正在清理...";
-      status.className = "text-sm text-blue-600";
-
-      try {
-        const response = await fetch("/api/admin/clean", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            clean_all: cleanAll,
-          }),
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          status.textContent = data.message;
-          status.className = "text-sm text-green-600";
-          // 清理完成后刷新页面，更新统计信息
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
-        } else {
-          status.textContent = "清理失败: " + data.error;
-          status.className = "text-sm text-red-600";
-        }
-      } catch (error) {
-        status.textContent = "清理失败: " + error.message;
-        status.className = "text-sm text-red-600";
-      }
-    }
   </script>
 </body>
 

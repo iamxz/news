@@ -89,9 +89,14 @@
           <h2 class="text-lg font-semibold text-gray-900 mb-2 leading-snug">
             {{ article.title }}
           </h2>
-          {% if article.title_zh %}
+          {% if article.title_zh and article.language != 'zh' %}
           <p class="text-base text-gray-700 mb-3 leading-relaxed">
             {{ article.title_zh }}
+          </p>
+          {% endif %}
+          {% if article.title_en and article.language == 'zh' %}
+          <p class="text-base text-gray-700 mb-3 leading-relaxed">
+            {{ article.title_en }}
           </p>
           {% endif %}
 
@@ -107,8 +112,8 @@
           </div>
         </div>
 
-        <!-- 翻译按钮 -->
-        {% if not article.title_zh or not article.content_zh %}
+        <!-- 翻译按钮：任一语言缺失时显示 -->
+        {% if not article.title_zh or not article.title_en or not article.content_zh or not article.content_en %}
         <button onclick="event.stopPropagation(); translateItem('{{ article.id }}', this)"
           class="mt-3 px-3 py-1.5 bg-emerald-500 text-white text-xs font-medium rounded hover:bg-emerald-600 transition">
           翻译

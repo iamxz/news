@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>新闻清理 - 管理后台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+  <!-- 导航栏 -->
+  <nav class="bg-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center space-x-8">
+          <a href="/admin" class="text-xl font-bold text-gray-900">📊 管理后台</a>
+          <a href="/admin" class="text-gray-700 hover:text-blue-600">仪表板</a>
+          <a href="/admin/fetch" class="text-gray-700 hover:text-blue-600">抓取管理</a>
+          <a href="/admin/translate" class="text-gray-700 hover:text-blue-600">翻译管理</a>
+          <a href="/admin/scheduler" class="text-gray-700 hover:text-blue-600">定时任务</a>
+          <a href="/admin/clean" class="text-blue-600 font-semibold">新闻清理</a>
+          <a href="/admin/settings" class="text-gray-700 hover:text-blue-600">系统设置</a>
+        </div>
+        <a href="/" class="text-blue-600 hover:text-blue-800">← 返回前台</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 主内容区 -->
+  <div class="max-w-4xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">新闻清理</h1>
+
+    <!-- 统计概览 -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="text-gray-500 text-sm mb-2">总新闻数</div>
+        <div class="text-3xl font-bold text-gray-900">{{ stats.total }}</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="text-gray-500 text-sm mb-2">已翻译</div>
+        <div class="text-3xl font-bold text-green-600">{{ stats.translated }}</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="text-gray-500 text-sm mb-2">新闻源数</div>
+        <div class="text-3xl font-bold text-purple-600">{{ stats.by_source|length }}</div>
+      </div>
+    </div>
+
+    <!-- 清理选项卡片 -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <h2 class="text-xl font-bold text-gray-900 mb-2">按日期清理</h2>
+      <p class="text-gray-500 text-sm mb-4">删除指定日期 <strong>之前</strong>（不含当天）发布的新闻</p>
+
+      <div class="flex flex-wrap items-end gap-4">
+        <div>
+          <label for="before-date" class="block text-sm font-medium text-gray-700 mb-1">选择截止日期</label>
+          <input type="date" id="before-date" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
+        </div>
+        <button onclick="cleanBeforeDate()" class="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">
+          清理该日期之前的新闻
+        </button>
+      </div>
+
+      <div id="date-status" class="mt-4 text-sm"></div>
+    </div>
+
+    <!-- 清理全部 -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6 border-l-4 border-red-500">
+      <h2 class="text-xl font-bold text-gray-900 mb-2">清理全部新闻</h2>
+      <p class="text-gray-500 text-sm mb-4">⚠️ 此操作将删除数据库中 <strong>所有</strong> 新闻，不可恢复，请谨慎操作。</p>
+
+      <div class="flex items-center gap-4">
+        <label class="flex items-center space-x-2 text-sm text-gray-700">
+          <input type="checkbox" id="confirm-all" class="w-4 h-4" />
+          <span>我确认要删除所有新闻</span>
+        </label>
+        <button id="btn-clean-all" onclick="cleanAll()" disabled class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+          清理全部
+        </button>
+      </div>
+
+      <div id="all-status" class="mt-4 text-sm"></div>
+    </div>
+  </div>
+
+  <script>
+    // 确认复选框控制按钮可用性
+    document.getElementById('confirm-all').addEventListener('change', function () {
+      document.getElementById('btn-clean-all').disabled = !this.checked;
+    });
+
+    // 设置日期默认值为 7 天前
+    (function () {
+      const input = document.getElementById('before-date');
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      input.value = sevenDaysAgo.toISOString().split('T')[0];
+    })();
+
+    async function cleanBeforeDate() {
+      const dateInput = document.getElementById('before-date');
+      const beforeDate = dateInput.value;
+
+      if (!beforeDate) {
+        alert('请选择日期');
+        return;
+      }
+
+      if (!confirm(`确认清理 ${beforeDate} 之前的所有新闻？此操作不可恢复。`)) {
+        return;
+      }
+
+      const status = document.getElementById('date-status');
+      status.textContent = '正在清理...';
+      status.className = 'mt-4 text-sm text-blue-600';
+
+      try {
+        const response = await fetch('/api/admin/clean', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode: 'before_date', before_date: beforeDate }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          status.textContent = `✅ ${data.message}`;
+          status.className = 'mt-4 text-sm text-green-600';
+          // 清理成功后刷新页面以更新统计
+          setTimeout(() => location.reload(), 1500);
+        } else {
+          status.textContent = '❌ 清理失败: ' + data.error;
+          status.className = 'mt-4 text-sm text-red-600';
+        }
+      } catch (error) {
+        status.textContent = '❌ 清理失败: ' + error.message;
+        status.className = 'mt-4 text-sm text-red-600';
+      }
+    }
+
+    async function cleanAll() {
+      if (!confirm('确认删除所有新闻？此操作不可恢复！')) {
+        return;
+      }
+
+      const status = document.getElementById('all-status');
+      status.textContent = '正在清理...';
+      status.className = 'mt-4 text-sm text-blue-600';
+
+      try {
+        const response = await fetch('/api/admin/clean', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode: 'all' }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          status.textContent = `✅ ${data.message}`;
+          status.className = 'mt-4 text-sm text-green-600';
+          // 重置确认框并刷新页面
+          document.getElementById('confirm-all').checked = false;
+          document.getElementById('btn-clean-all').disabled = true;
+          setTimeout(() => location.reload(), 1500);
+        } else {
+          status.textContent = '❌ 清理失败: ' + data.error;
+          status.className = 'mt-4 text-sm text-red-600';
+        }
+      } catch (error) {
+        status.textContent = '❌ 清理失败: ' + error.message;
+        status.className = 'mt-4 text-sm text-red-600';
+      }
+    }
+  </script>
+</body>
+
+</html>

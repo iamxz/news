@@ -88,6 +88,7 @@ class DouyinFetcher(BaseFetcher):
                 title=word,
                 content=content,
                 source=self.source_name,
+                language=self.language,
                 url=link,
                 published_at=published_at,
                 category='热搜',

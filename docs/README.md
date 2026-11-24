@@ -45,7 +45,7 @@
 - 微博热搜 ✅
 - 抖音热榜 ✅
 
-详见 [AGENTS.md](AGENTS.md)
+详见 [AGENTS.md](../AGENTS.md)
 
 ## 🚀 快速开始
 
@@ -60,21 +60,19 @@
 git clone <your-repo-url>
 cd news
 
-# 创建虚拟环境
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# 或 venv\Scripts\activate  # Windows
+# 安装依赖（自动创建虚拟环境）
+make install
 
-# 安装依赖
+# 或手动安装：
+python -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
 ### 配置
 
 ```bash
-# 复制环境变量模板
-cp .env.example .env
-
 # 编辑 .env 文件，添加必要的 API key
 # 至少需要配置一个翻译 API：
 # - OPENAI_API_KEY（推荐）
@@ -89,10 +87,10 @@ cp .env.example .env
 
 ```bash
 # 启动 Web 服务器
-python web_server.py
+python main.py
 
 # 或使用快捷脚本
-./start_web.sh
+./start.sh
 ```
 
 然后访问：
@@ -150,6 +148,11 @@ src/
 ├── scheduler/          # 定时任务
 └── utils/              # 工具函数
 
+routes/                 # Flask Blueprint 路由
+├── frontend.py        # 前台
+├── admin.py           # 管理后台
+└── api.py             # API
+
 templates/              # Web 模板
 ├── index.html         # 前台首页
 ├── detail.html        # 新闻详情
@@ -160,8 +163,13 @@ templates/              # Web 模板
     ├── validate.html  # 验证管理
     └── settings.html  # 系统设置
 
-web_server.py          # Web 应用主程序
-requirements.txt       # 依赖列表
+skills/                 # CLI 功能模块
+├── news_fetcher_skill.py
+├── news_analyzer_skill.py
+└── utils/
+
+main.py                 # Web 应用主程序
+web_server.py           # main.py 别名
 ```
 
 ## 🔍 验证系统

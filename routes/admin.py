@@ -43,8 +43,8 @@ def fetch():
 
 @admin_bp.route('/translate')
 def translate():
-    """翻译管理页面"""
-    untranslated = db.get_untranslated_articles(limit=50)
+    """翻译管理页面 — 只显示英文未翻译新闻"""
+    untranslated = db.get_untranslated_en_articles(limit=50)
     return render_template('admin/translate.html', articles=untranslated)
 
 
@@ -58,3 +58,10 @@ def settings():
 def scheduler():
     """定时任务管理页面"""
     return render_template('admin/scheduler.html')
+
+
+@admin_bp.route('/clean')
+def clean():
+    """新闻清理管理页面"""
+    stats = db.get_statistics()
+    return render_template('admin/clean.html', stats=stats)

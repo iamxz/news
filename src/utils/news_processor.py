@@ -94,10 +94,11 @@ class NewsProcessor:
         # 常见分类映射
         category_map = {
             'general': '综合',
-            'news': '新闻',
+            'news': '综合',
             'politics': '政治',
             'economy': '经济',
-            'finance': '金融',
+            'finance': '财经',
+            'financial': '财经',
             'technology': '科技',
             'science': '科学',
             'sports': '体育',
@@ -111,9 +112,24 @@ class NewsProcessor:
             'world': '国际',
             'national': '国内',
             'tech': '科技',
+            'markets': '财经',
+            'market': '财经',
+            'opinion': '综合',
+            'top': '综合',
+            'us_news': '国际',
+            # 非标准中文分类
+            '热搜': '综合',
+            '头条': '综合',
+            '日报': '综合',
+            '英国': '国际',
+            '美国新闻': '国际',
+            '市场': '财经',
+            '观点': '综合',
+            # 英文组合
             'sports news': '体育',
             'entertainment news': '娱乐',
             'business news': '商业',
+            # 中文新闻分类
             '政治新闻': '政治',
             '经济新闻': '经济',
             '科技新闻': '科技',

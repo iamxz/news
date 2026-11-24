@@ -23,12 +23,56 @@
       .news-item:hover {
         background-color: #f9fafb;
       }
+      /* Tab 面板切换 */
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+      /* Tab 按钮 */
+      .tab-btn {
+        position: relative;
+      }
+      .tab-btn.active {
+        color: #2563eb;
+        border-bottom-color: #2563eb;
+      }
+      .tab-btn.active::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1px;
+        height: 2px;
+        background: #2563eb;
+      }
+      /* 媒体块内新闻列表：大屏两列，小屏一列 */
+      .media-news-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+      @media (min-width: 768px) {
+        .media-news-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      /* 标题尽量占满 */
+      .news-title {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.5;
+      }
     </style>
   </head>
   <body class="bg-gray-50 min-h-screen">
-    <div class="max-w-5xl mx-auto px-4 py-8">
+    <div class="max-w-7xl mx-auto px-4 py-8">
       <!-- 简洁头部 -->
-      <header class="mb-6">
+      <header class="mb-4">
         <h1 class="text-2xl font-bold text-gray-900 mb-1">全球新闻</h1>
         <div class="flex justify-between items-center">
           <p class="text-sm text-gray-500">今日新闻 · {{ today_date }}</p>
@@ -41,34 +85,118 @@
         </div>
       </header>
 
-      <!-- 新闻列表 -->
-      <div class="space-y-4">
-        {% for media, articles in media_news.items() %}
-        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <h2 class="px-4 py-2 font-semibold text-gray-800 bg-gray-50">
-            {{ media }}
-          </h2>
-          <div class="divide-y divide-gray-100">
-            {% for article in articles %}
-            <div class="news-item">
-              <a
-                href="/article/{{ article.id }}"
-                class="block px-4 py-3 hover:no-underline"
-              >
-                <h3
-                  class="text-base text-gray-900 leading-tight flex items-start"
-                >
-                  <span class="text-blue-600 font-bold mr-3 min-w-[2rem]">
-                    {{ loop.index | format_number }}
-                  </span>
-                  {{ article.title }}
-                </h3>
-              </a>
-            </div>
-            {% endfor %}
-          </div>
+      <!-- Tab 切换 -->
+      <div class="border-b border-gray-200 mb-4">
+        <div class="flex gap-6">
+          <button
+            class="tab-btn active pb-2 text-base font-semibold text-gray-900 border-b-2 border-transparent transition-colors hover:text-blue-600"
+            onclick="switchTab('cn')"
+          >
+            中文新闻
+            <span class="text-xs font-normal text-gray-400">{{ cn_count }}</span>
+          </button>
+          <button
+            class="tab-btn pb-2 text-base font-semibold text-gray-500 border-b-2 border-transparent transition-colors hover:text-blue-600"
+            onclick="switchTab('en')"
+          >
+            英文新闻
+            <span class="text-xs font-normal text-gray-400">{{ en_count }}</span>
+          </button>
         </div>
-        {% endfor %}
+      </div>
+
+      <!-- 中文新闻 Tab 面板 -->
+      <div id="tab-cn" class="tab-panel active">
+        {% if cn_media %}
+        <div class="space-y-4">
+          {% for media, articles in cn_media.items() %}
+          <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <h2 class="px-4 py-2 font-semibold text-gray-800 bg-gray-50 text-sm flex items-center gap-2">
+              <span class="inline-block w-2 h-2 bg-red-500 rounded-full"></span>
+              {{ media }}
+              <span class="text-xs text-gray-400 font-normal">{{ articles|length }} 条</span>
+            </h2>
+            <div class="media-news-grid divide-x divide-gray-100">
+              {% for article in articles %}
+              <div class="news-item">
+                <a
+                  href="/article/{{ article.id }}"
+                  class="block px-4 py-3 hover:no-underline"
+                >
+                  <h3 class="text-sm text-gray-900 news-title flex items-start">
+                    <span class="text-blue-600 font-bold mr-2 min-w-[1.5rem] shrink-0 text-xs">
+                      {{ loop.index | format_number }}
+                    </span>
+                    <span>{{ article.title }}</span>
+                  </h3>
+                  {% if article.title_en %}
+                  <p class="text-xs text-gray-400 mt-1 ml-7 news-title">
+                    {{ article.title_en }}
+                  </p>
+                  {% endif %}
+                  <div class="ml-7 mt-1 text-xs text-gray-400">
+                    <span>{{ article.published_at|format_datetime }}</span>
+                    {% if article.category %}<span class="mx-1">·</span><span>{{ article.category }}</span>{% endif %}
+                  </div>
+                </a>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-16 text-gray-400">
+          <p class="text-base">暂无中文新闻</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- 英文新闻 Tab 面板 -->
+      <div id="tab-en" class="tab-panel">
+        {% if en_media %}
+        <div class="space-y-4">
+          {% for media, articles in en_media.items() %}
+          <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <h2 class="px-4 py-2 font-semibold text-gray-800 bg-gray-50 text-sm flex items-center gap-2">
+              <span class="inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
+              {{ media }}
+              <span class="text-xs text-gray-400 font-normal">{{ articles|length }} 条</span>
+            </h2>
+            <div class="media-news-grid divide-x divide-gray-100">
+              {% for article in articles %}
+              <div class="news-item">
+                <a
+                  href="/article/{{ article.id }}"
+                  class="block px-4 py-3 hover:no-underline"
+                >
+                  <h3 class="text-sm text-gray-900 news-title flex items-start">
+                    <span class="text-blue-600 font-bold mr-2 min-w-[1.5rem] shrink-0 text-xs">
+                      {{ loop.index | format_number }}
+                    </span>
+                    <span>{{ article.title }}</span>
+                  </h3>
+                  {% if article.title_zh %}
+                  <p class="text-xs text-gray-400 mt-1 ml-7 news-title">
+                    {{ article.title_zh }}
+                  </p>
+                  {% endif %}
+                  <div class="ml-7 mt-1 text-xs text-gray-400">
+                    <span>{{ article.published_at|format_datetime }}</span>
+                    {% if article.category %}<span class="mx-1">·</span><span>{{ article.category }}</span>{% endif %}
+                  </div>
+                </a>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-16 text-gray-400">
+          <p class="text-base">暂无英文新闻</p>
+        </div>
+        {% endif %}
       </div>
 
       <!-- 底部 -->
@@ -78,5 +206,22 @@
         <p>全球新闻聚合 · 今日热点</p>
       </footer>
     </div>
+
+    <script>
+      function switchTab(lang) {
+        // 切换面板
+        document.querySelectorAll('.tab-panel').forEach(function(el) {
+          el.classList.remove('active');
+        });
+        document.getElementById('tab-' + lang).classList.add('active');
+        // 切换按钮样式
+        document.querySelectorAll('.tab-btn').forEach(function(el) {
+          el.classList.remove('active', 'text-gray-900');
+          el.classList.add('text-gray-500');
+        });
+        event.currentTarget.classList.add('active', 'text-gray-900');
+        event.currentTarget.classList.remove('text-gray-500');
+      }
+    </script>
   </body>
 </html>

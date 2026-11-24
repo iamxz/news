@@ -57,9 +57,17 @@ class Database:
                     category TEXT,
                     priority INTEGER,
                     tags TEXT,
-                    translated BOOLEAN DEFAULT 0
+                    translated BOOLEAN DEFAULT 0,
+                    language TEXT DEFAULT 'en'
                 )
             """)
+            
+            # 兼容旧数据库：若 language 列不存在则添加
+            try:
+                cursor.execute("SELECT language FROM articles LIMIT 1")
+            except sqlite3.OperationalError:
+                cursor.execute("ALTER TABLE articles ADD COLUMN language TEXT DEFAULT 'en'")
+                logger.info("已添加 language 列到 articles 表")
             
             # 创建索引
             cursor.execute("""
@@ -100,14 +108,14 @@ class Database:
                     INSERT OR REPLACE INTO articles (
                         id, title, title_zh, title_en, content, content_zh, content_en, source, url,
                         published_at, fetched_at, category, priority, tags,
-                        translated
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        translated, language
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     article.id, article.title, article.title_zh, article.title_en,
                     article.content, article.content_zh, article.content_en, article.source, article.url,
                     article.published_at, article.fetched_at, article.category,
                     article.priority, tags_json,
-                    article.translated
+                    article.translated, article.language
                 ))
                 
                 conn.commit()
@@ -143,15 +151,15 @@ class Database:
                             INSERT OR REPLACE INTO articles (
                                 id, title, title_zh, title_en, content, content_zh, content_en,
                                 source, url, published_at, fetched_at, category, priority, tags,
-                                translated
-                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                translated, language
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """, (
                             article.id, article.title, article.title_zh, article.title_en,
                             article.content, article.content_zh, article.content_en,
                             article.source, article.url,
                             article.published_at, article.fetched_at, article.category,
                             article.priority, tags_json,
-                            article.translated
+                            article.translated, article.language
                         ))
                         count += 1
                     except Exception as e:
@@ -252,10 +260,10 @@ class Database:
     def get_untranslated_articles(self, limit: int = 10) -> List[NewsArticle]:
         """
         获取未翻译的新闻
-        
+
         Args:
             limit: 数量限制
-        
+
         Returns:
             未翻译的新闻列表
         """
@@ -268,12 +276,40 @@ class Database:
                     ORDER BY priority DESC, published_at DESC 
                     LIMIT ?
                 """, (limit,))
-                
+
                 rows = cursor.fetchall()
                 return [self._row_to_article(row) for row in rows]
-                
+
         except Exception as e:
             logger.error(f"获取未翻译新闻失败: {e}", exc_info=True)
+            return []
+
+    def get_untranslated_en_articles(self, limit: int = 50) -> List[NewsArticle]:
+        """
+        获取英文未翻译的新闻（language='en' 且缺少中文翻译）
+
+        Args:
+            limit: 数量限制
+
+        Returns:
+            英文未翻译新闻列表
+        """
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT * FROM articles
+                    WHERE language = 'en'
+                      AND (title_zh = '' OR content_zh = '')
+                    ORDER BY priority DESC, published_at DESC
+                    LIMIT ?
+                """, (limit,))
+
+                rows = cursor.fetchall()
+                return [self._row_to_article(row) for row in rows]
+
+        except Exception as e:
+            logger.error(f"获取英文未翻译新闻失败: {e}", exc_info=True)
             return []
     
 
@@ -298,6 +334,36 @@ class Database:
                 
         except Exception as e:
             logger.error(f"删除所有新闻失败: {e}", exc_info=True)
+            return 0
+    
+    def delete_articles_before_date(self, before_date: datetime) -> int:
+        """
+        删除指定日期之前（不含当天）的新闻
+        
+        Args:
+            before_date: 截止日期，将删除 published_at < before_date(00:00:00) 的新闻
+        
+        Returns:
+            删除的数量
+        """
+        try:
+            # 取 before_date 当天 00:00:00 作为分界点
+            cutoff = before_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            cutoff_str = cutoff.strftime("%Y-%m-%d %H:%M:%S")
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "DELETE FROM articles WHERE published_at < ?",
+                    (cutoff_str,)
+                )
+                deleted = cursor.rowcount
+                conn.commit()
+                
+                logger.info(f"删除 {cutoff_str} 之前的新闻: {deleted} 条")
+                return deleted
+                
+        except Exception as e:
+            logger.error(f"按日期删除新闻失败: {e}", exc_info=True)
             return 0
     
     def get_today_articles_count(self) -> int:
@@ -439,6 +505,26 @@ class Database:
         Returns:
             NewsArticle 对象
         """
+        # 安全读取 language 字段，兼容旧数据库
+        try:
+            language = row['language'] or ''
+        except (KeyError, IndexError):
+            language = ''
+
+        # 如果 language 为空，通过内容自动检测
+        if not language:
+            title = row['title'] or ''
+            content = row['content'] or ''
+            text = title + content
+            if text:
+                cjk_count = sum(1 for ch in text if '\u4e00' <= ch <= '\u9fff')
+                if cjk_count > len(text) * 0.1:
+                    language = 'zh'
+                else:
+                    language = 'en'
+            else:
+                language = 'en'
+
         return NewsArticle(
             id=row['id'],
             title=row['title'],
@@ -448,13 +534,14 @@ class Database:
             content_zh=row['content_zh'] or '',
             content_en=row['content_en'] or '',
             source=row['source'],
+            language=language,
             url=row['url'],
             published_at=datetime.fromisoformat(row['published_at']),
             fetched_at=datetime.fromisoformat(row['fetched_at']),
             category=row['category'] or '综合',
             priority=row['priority'] or 5,
             tags=json.loads(row['tags']) if row['tags'] else [],
-            translated=bool(row['translated'])
+            translated=bool(row['translated']),
         )
 
 

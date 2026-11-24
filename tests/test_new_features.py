@@ -4,7 +4,7 @@
 测试 AFP 抓取器、定时任务
 """
 import asyncio
-from src.fetchers.afp import AFPFetcher
+from src.fetchers import AFPFetcher
 
 
 async def test_afp_fetcher():

@@ -1,5 +1,5 @@
 import asyncio
-from src.fetchers.toutiao import ToutiaoFetcher
+from src.fetchers import ToutiaoFetcher
 
 async def test_toutiao_fetcher():
     print("测试今日头条热搜抓取器...")

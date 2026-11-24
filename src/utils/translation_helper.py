@@ -12,11 +12,23 @@ if TYPE_CHECKING:
 def detect_source_lang(article: "NewsArticle") -> str:
     """
     从文章的 language 字段获取原文语言。
+    如果 language 字段为空或未设置，通过内容自动检测。
 
     Returns:
         'zh' | 'en' | 'ja' 等语言代码
     """
-    return getattr(article, 'language', 'en')
+    lang = getattr(article, 'language', None)
+    if lang:
+        return lang
+
+    # 回退：通过标题/内容简单检测语言
+    text = (article.title or '') + (article.content or '')
+    if text:
+        # 统计中文字符数量
+        cjk_count = sum(1 for ch in text if '\u4e00' <= ch <= '\u9fff')
+        if cjk_count > len(text) * 0.1:
+            return 'zh'
+    return 'en'
 
 
 def translate_article(article: "NewsArticle", translator_manager: "TranslatorManager") -> None:

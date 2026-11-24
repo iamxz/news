@@ -90,10 +90,8 @@ class Kr36Fetcher(BaseFetcher):
 
                 article = {
                     'title': entry.get('title', '').strip(),
-                    'title_zh': entry.get('title', '').strip(),
                     'url': entry.get('link', '').strip(),
                     'content': content,
-                    'content_zh': content,
                     'published_at': published_at,
                     'category': self._map_category(category),
                     'priority': 6,

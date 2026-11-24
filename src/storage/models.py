@@ -43,24 +43,49 @@ class NewsArticle(BaseModel):
             data: 新闻字典数据
             fetcher: 可选的抓取器实例，用于补充 language 等默认值
         """
+        # 优先使用字典中的 language，其次使用抓取器的 language
         default_lang = getattr(fetcher, 'language', 'en') if fetcher else 'en'
+        language = data.get('language') or default_lang
+
+        # 根据原文语言自动填充对应语言的字段
+        title = data.get('title', '')
+        content = data.get('content', '')
+        title_zh = data.get('title_zh', '')
+        title_en = data.get('title_en', '')
+        content_zh = data.get('content_zh', '')
+        content_en = data.get('content_en', '')
+
+        # 如果尚未翻译，将原文填入对应语言字段
+        translated = data.get('translated', False)
+        if not translated:
+            if language == 'zh':
+                if not title_zh:
+                    title_zh = title
+                if not content_zh:
+                    content_zh = content
+            else:
+                if not title_en:
+                    title_en = title
+                if not content_en:
+                    content_en = content
+
         return cls(
             id=data.get('id'),
-            title=data.get('title'),
-            title_zh=data.get('title_zh', ''),
-            title_en=data.get('title_en', ''),
-            content=data.get('content'),
-            content_zh=data.get('content_zh', ''),
-            content_en=data.get('content_en', ''),
+            title=title,
+            title_zh=title_zh,
+            title_en=title_en,
+            content=content,
+            content_zh=content_zh,
+            content_en=content_en,
             source=data.get('source'),
-            language=data.get('language', default_lang),
+            language=language,
             url=data.get('url'),
             published_at=data.get('published_at'),
             fetched_at=data.get('fetched_at', datetime.now()),
             category=data.get('category', '综合'),
             priority=data.get('priority', 5),
             tags=data.get('tags', []),
-            translated=data.get('translated', False),
+            translated=translated,
         )
 
     class Config:

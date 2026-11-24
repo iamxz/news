@@ -6,6 +6,7 @@ Google 翻译器
 from typing import Optional
 import requests
 import json
+import random
 import time
 
 from src.translators.base import BaseTranslator
@@ -19,10 +20,11 @@ class GoogleTranslator(BaseTranslator):
         super().__init__("Google Translate")
         
         # Google Translate API 免费接口
+        # client=at 比 client=gtx 更不容易被 429 限流
         self.api_url = "https://translate.googleapis.com/translate_a/single"
         self.session = requests.Session()
         self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
             'Accept-Encoding': 'gzip, deflate, br',
@@ -58,16 +60,30 @@ class GoogleTranslator(BaseTranslator):
         if not text or not text.strip():
             return ""
         
-        max_retries = 2
+        max_retries = 3
         retry_delay = 2
         
         for attempt in range(max_retries):
             try:
+                # Google 语言代码映射
+                lang_map = {
+                    "zh": "zh-CN",
+                    "zh-cn": "zh-CN",
+                    "zh-tw": "zh-TW",
+                    "en": "en",
+                    "ja": "ja",
+                    "ko": "ko",
+                }
+                src = lang_map.get(source_lang, source_lang)
+                tgt = lang_map.get(target_lang, target_lang)
+
                 # Google Translate 参数
+                # client=at 比 gtx 限流更少；交替使用以分散风险
+                client = 'at' if attempt % 2 == 0 else 'gtx'
                 params = {
-                    'client': 'gtx',  # 使用 gtx 客户端，可以绕过一些限制
-                    'sl': source_lang,  # 源语言
-                    'tl': target_lang,  # 目标语言
+                    'client': client,
+                    'sl': src,  # 源语言
+                    'tl': tgt,  # 目标语言
                     'dt': 't',  # 翻译文本
                     'q': text  # 要翻译的文本
                 }
@@ -82,8 +98,9 @@ class GoogleTranslator(BaseTranslator):
                 
                 # 检查是否是 429 错误
                 if response.status_code == 429:
-                    logger.warning(f"[{self.name}] 请求过于频繁，正在重试 ({attempt+1}/{max_retries})...")
-                    time.sleep(retry_delay * (2 ** attempt))  # 指数退避
+                    wait = retry_delay * (2 ** attempt) + random.uniform(1, 3)
+                    logger.warning(f"[{self.name}] 请求过于频繁 ({attempt+1}/{max_retries})，等待 {wait:.1f}s 后重试 (client={client})...")
+                    time.sleep(wait)
                     continue
                 
                 response.raise_for_status()
@@ -145,6 +162,6 @@ class GoogleTranslator(BaseTranslator):
             
             # 避免请求过快
             if i < len(texts) - 1:
-                time.sleep(5)  # 增加延迟时间，避免429错误
+                time.sleep(random.uniform(1, 3))  # 随机延迟，避免429错误
         
         return results

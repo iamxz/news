@@ -268,6 +268,7 @@ class BaiduFetcher(BaseFetcher):
                 title=title,
                 content=content,
                 source=self.source_name,
+                language=self.language,
                 url=link,
                 published_at=published_at,
                 category='热搜',

@@ -66,6 +66,7 @@ class FinancialTimesFetcher(BaseFetcher):
             title=title,
             content=content,
             source=self.source_name,
+            language=self.language,
             url=url,
             published_at=published_at,
             category='财经',

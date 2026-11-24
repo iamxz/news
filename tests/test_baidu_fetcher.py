@@ -1,5 +1,5 @@
 import asyncio
-from src.fetchers.baidu import BaiduFetcher
+from src.fetchers import BaiduFetcher
 
 async def test_baidu_fetcher():
     print("测试百度热搜抓取器...")

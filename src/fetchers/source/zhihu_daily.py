@@ -79,6 +79,7 @@ class ZhihuDailyFetcher(BaseFetcher):
             title=title,
             content=content,
             source=self.source_name,
+            language=self.language,
             url=url,
             published_at=datetime.now(),
             category='日报',

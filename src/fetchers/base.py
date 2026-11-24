@@ -138,31 +138,37 @@ class BaseFetcher(ABC):
         标准化新闻数据格式
         
         Args:
-            article: 原始新闻数据
+            article: 原始新闻数据（可能是 dict 或 NewsArticle 对象）
         
         Returns:
-            标准化后的新闻数据
+            标准化后的新闻数据字典
         """
         # 转换可能的对象为字典
         article = model_to_dict(article)
         
         # 生成唯一 ID
-        if 'id' not in article:
+        if not article.get('id'):
             id_source = f"{article.get('url', '')}{article.get('title', '')}"
             article['id'] = generate_id(id_source)
         
         # 确保必需字段存在
         article.setdefault('source', self.source_name)
-        article.setdefault('language', self.language)
         article.setdefault('title', '')
-        article.setdefault('title_zh', '')
         article.setdefault('content', '')
-        article.setdefault('content_zh', '')
         article.setdefault('url', '')
         article.setdefault('published_at', datetime.now())
-        article.setdefault('category', 'general')
+        article.setdefault('category', '综合')
         article.setdefault('priority', 5)
         article.setdefault('tags', [])
+        article.setdefault('title_zh', '')
+        article.setdefault('content_zh', '')
+        article.setdefault('title_en', '')
+        article.setdefault('content_en', '')
+        article.setdefault('translated', False)
+
+        # 关键：始终用抓取器的 language 覆盖，确保语言标记正确
+        # 抓取器知道自己的源语言，优先使用抓取器的设置
+        article['language'] = self.language
 
         return article
     

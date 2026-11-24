@@ -5,19 +5,24 @@
 ## 启动与命令
 
 ```bash
-# 安装依赖
+# 安装依赖（若 venv 因目录迁移而失效会自动修复）
 make install        # ./install.sh
 # 开发模式
-make dev            # ./dev.sh
+make dev            # ./dev.sh（默认端口 4000，可用 PORT=xxxx 覆盖）
 # 启动应用
 make run            # ./start.sh
 
-# 应用子命令（main.py）
-python main.py fetch|translate|validate|show|stats|pipeline|clean
+# 应用子命令（CLI 入口 src/main.py，当前已实现 fetch / show）
+make fetch|show|translate|validate|stats|pipeline|clean-news
+venv/bin/python -m src.main fetch
 
 # Web 服务器（端口 4000）
-python main.py                  # debug=True
-# 或 python web_server.py
+./start.sh                       # debug=True
+venv/bin/python main.py --port 4000
+# 或 venv/bin/python web_server.py
+
+# 注意：脚本直接调用 venv/bin/python，不依赖 source venv/bin/activate
+# （项目目录变更后 activate 内的 VIRTUAL_ENV 会失效，且 macOS 无 python 命令）
 
 # 代码检查顺序（make check 包含全部）
 make format         # black .

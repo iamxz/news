@@ -18,11 +18,9 @@ for name, obj in globals_copy:
     if isinstance(obj, type) and name.endswith('Fetcher') and name != 'BaseFetcher':
         # 将驼峰命名转换为小写下划线命名
         # 例如: ReutersFetcher -> reuters,
-        key = re.sub(r'([a-z0-9])([A-Z])', r'\1\2', name)
-        key = re.sub(r'([A-Z])([A-Z][a-z])', r'\1\2', name)
-        key = key.lower()
-        # 去掉 Fetcher 后缀
-        key = key[:-7]  # 7 是 'Fetcher' 的长度
+        key = re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', name)
+        key = re.sub(r'([A-Z])([A-Z][a-z])', r'\1_\2', key)
+        key = key.lower().replace('fetcher', '').strip('_')
         
         # 添加到 FETCHERS 字典
         FETCHERS[key] = obj

@@ -1,5 +1,8 @@
 # Makefile - 提供便捷的命令快捷方式
 
+# 统一使用项目内虚拟环境的解释器（macOS 无 python 命令，且避免激活失效的 activate）
+PY := venv/bin/python
+
 .PHONY: help install test clean run dev format lint type check deploy
 
 # 默认目标
@@ -20,25 +23,25 @@ run:  ## 启动应用
 	./start.sh
 
 test:  ## 运行测试
-	pytest -v
+	$(PY) -m pytest -v
 
 test-cov:  ## 运行测试并生成覆盖率报告
-	pytest --cov=src --cov-report=html --cov-report=term
+	$(PY) -m pytest --cov=src --cov-report=html --cov-report=term
 	@echo ""
 	@echo "✓ HTML 报告: htmlcov/index.html"
 
 format:  ## 格式化代码
-	black .
+	$(PY) -m black .
 	@echo "✓ 代码已格式化"
 
 lint:  ## 运行 lint 检查
-	ruff check .
+	$(PY) -m ruff check .
 
 lint-fix:  ## 运行 lint 并自动修复
-	ruff check --fix .
+	$(PY) -m ruff check --fix .
 
 type:  ## 类型检查
-	mypy src/
+	$(PY) -m mypy src/
 
 check: format lint-fix type  ## 运行所有代码检查
 
@@ -55,27 +58,27 @@ clean:  ## 清理缓存和临时文件
 dev:  ## 开发模式
 	./dev.sh
 
-deploy:  ## 部署到生产环境
-	./deploy.sh
+deploy:  ## 部署提示（无 deploy.sh 时给出说明）
+	@echo "警告: 未找到 deploy.sh，请使用 ./start.sh 启动，或自行配置部署流程。"
 
-# 应用命令快捷方式
+# 应用命令快捷方式（CLI 入口为 src/main.py）
 fetch:  ## 抓取新闻
-	python main.py fetch
+	$(PY) -m src.main fetch
 
 translate:  ## 翻译新闻
-	python main.py translate
+	$(PY) -m src.main translate
 
 validate:  ## 验证新闻
-	python main.py validate
+	$(PY) -m src.main validate
 
 show:  ## 显示新闻列表
-	python main.py show
+	$(PY) -m src.main show
 
 stats:  ## 显示统计信息
-	python main.py stats
+	$(PY) -m src.main stats
 
 pipeline:  ## 运行完整流程
-	python main.py pipeline
+	$(PY) -m src.main pipeline
 
 clean-news:  ## 清理旧新闻
-	python main.py clean
+	$(PY) -m src.main clean

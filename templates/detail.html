@@ -29,9 +29,14 @@
             <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-3 leading-tight">
                 {{ article.title }}
             </h1>
-            {% if article.title_zh %}
+            {% if article.title_zh and article.language != 'zh' %}
             <h2 class="text-xl md:text-2xl text-gray-700 mb-6 leading-relaxed">
                 {{ article.title_zh }}
+            </h2>
+            {% endif %}
+            {% if article.title_en and article.language == 'zh' %}
+            <h2 class="text-xl md:text-2xl text-gray-700 mb-6 leading-relaxed">
+                {{ article.title_en }}
             </h2>
             {% endif %}
 
@@ -89,8 +94,8 @@
             </div>
             {% endif %}
 
-            <!-- 英文翻译 -->
-            {% if article.content_en and article.content_en != article.content %}
+            <!-- 英文翻译（仅中文原文时显示） -->
+            {% if article.content_en and article.language == 'zh' %}
             <div class="mb-8">
                 <h3 class="text-lg font-semibold text-gray-900 mb-3">English</h3>
                 <div
@@ -100,8 +105,8 @@
             </div>
             {% endif %}
 
-            <!-- 中文翻译 -->
-            {% if article.content_zh %}
+            <!-- 中文翻译（仅非中文原文时显示） -->
+            {% if article.content_zh and article.language != 'zh' %}
             <div class="mb-8">
                 <h3 class="text-lg font-semibold text-gray-900 mb-3">中文翻译</h3>
                 <div

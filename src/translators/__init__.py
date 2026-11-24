@@ -91,11 +91,17 @@ class TranslatorManager:
                             logger.debug(f"翻译器跳过 ({translator.name}): 依赖库未安装或初始化失败")
                             continue
                 
-                # 对于免费翻译器（不需要 API key），直接加载
+                # 对于免费翻译器（不需要 API key），检查 is_available 后加载
                 free_translators = ['GoogleTranslator', 'BingTranslator', 'MyMemoryTranslator', 'LibreTranslator']
                 if translator.__class__.__name__ in free_translators:
-                    self.translators.append(translator)
-                    logger.info(f"翻译器已加载: {translator.name}")
+                    # 调用 is_available() 检查是否真正可用
+                    # 如果翻译器重写了 is_available，则尊重其结果
+                    # 否则默认加载（is_available 默认会尝试翻译测试）
+                    if translator.is_available():
+                        self.translators.append(translator)
+                        logger.info(f"翻译器已加载: {translator.name}")
+                    else:
+                        logger.info(f"翻译器跳过 ({translator.name}): 不可用")
                 else:
                     # 检查其他翻译器是否有有效的客户端
                     has_client = (

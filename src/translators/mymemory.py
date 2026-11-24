@@ -56,10 +56,22 @@ class MyMemoryTranslator(BaseTranslator):
             return ""
         
         try:
+            # MyMemory 语言代码映射
+            lang_map = {
+                "zh": "zh-CN",
+                "zh-cn": "zh-CN",
+                "zh-tw": "zh-TW",
+                "en": "en",
+                "ja": "ja",
+                "ko": "ko",
+            }
+            src = lang_map.get(source_lang, source_lang)
+            tgt = lang_map.get(target_lang, target_lang)
+
             # 构建请求参数
             params = {
                 "q": text,
-                "langpair": f"{source_lang}|{target_lang}",
+                "langpair": f"{src}|{tgt}",
             }
             
             # 发送请求
